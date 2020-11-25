@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function SidePanel() {
     return (
@@ -17,7 +18,7 @@ function SidePanel() {
             <div id="header_top" className="header_top">
                 <div className="container">
                     <div className="hleft">
-                        <a className="header-brand" href="index.html"><i className="fa fa-graduation-cap brand-logo"></i></a>
+                        <Link className="header-brand" to="/"><i className="fa fa-graduation-cap brand-logo"></i></Link>
                         <div className="dropdown">
                             <a href="javascript:void(0)" className="nav-link icon menu_toggle"><i className="fe fe-align-center"></i></a>
                             <a href="page-search.html" className="nav-link icon"><i className="fe fe-search" data-toggle="tooltip" data-placement="right" title="Search..."></i></a>
@@ -760,10 +761,10 @@ function SidePanel() {
                     <div className="tab-pane active" id="menu-uni" role="tabpanel">
                         <nav className="sidebar-nav">
                             <ul className="metismenu">
-                                <li className="active"><a href="index.html"><i className="fa fa-dashboard"></i><span>Dashboard</span></a></li>
+                                <li className="active"><Link to="/"><i className="fa fa-dashboard"></i><span>Dashboard</span></Link></li>
                                 <li><a href="professors.html"><i className="fa fa-black-tie"></i><span>Professors</span></a></li>
                                 <li><a href="staff.html"><i className="fa fa-user-circle-o"></i><span>Staff</span></a></li>
-                                <li><a href="students.html"><i className="fa fa-users"></i><span>Students</span></a></li>
+                                <li><Link to="students"><i className="fa fa-users"></i><span>Students</span></Link></li>
                                 <li><a href="departments.html"><i className="fa fa-users"></i><span>Departments</span></a></li>
                                 <li><a href="courses.html"><i className="fa fa-graduation-cap"></i><span>Courses</span></a></li>                        
                                 <li><a href="library.html"><i className="fa fa-book"></i><span>Library</span></a></li>
