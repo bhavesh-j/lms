@@ -782,7 +782,7 @@ function SidePanel() {
                     <div className="tab-pane" id="menu-admin" role="tabpanel">
                         <nav className="sidebar-nav">
                             <ul className="metismenu">
-                                <li><a href="payments.html"><i className="fa fa-credit-card"></i><span>Payments</span></a></li>
+                                <li><Link to="payments"><i className="fa fa-credit-card"></i><span>Payments</span></Link></li>
                                 <li><a href="noticeboard.html"><i className="fa fa-dashboard"></i><span>Noticeboard</span></a></li>
                                 <li><a href="taskboard.html"><i className="fa fa-list-ul"></i><span>Taskboard</span></a></li>
                                 <li><a href="hostel.html"><i className="fa fa-bed"></i><span>Hostel</span></a></li>
