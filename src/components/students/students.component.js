@@ -450,6 +450,54 @@ class Students extends AbstractComponent {
     }).catch(err => console.log(err));
   }
 
+  printIdCard() {
+    const header = `<!doctype html>
+    <html lang="en" dir="ltr">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <title>:: Ericsson :: Fees</title>
+    
+    <!-- Bootstrap Core and vandor -->
+    <link rel="stylesheet" href="../assets/plugins/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css">
+    <link rel="stylesheet" href="../assets/plugins/datatable/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/plugins/sweetalert/sweetalert.css">
+    
+    <!-- Core css -->
+    <link rel="stylesheet" href="../assets/css/style.min.css"/>
+    <link rel="stylesheet" href="assets/css/styles.css"/>
+    </head>
+    
+    <body class="font-muli theme-cyan gradient">`;
+    const footer = `<!-- Start Main project js, jQuery, Bootstrap -->
+    <script src="../assets/bundles/lib.vendor.bundle.js"></script>
+    
+    <!-- Start Plugin Js -->
+    <script src="../assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="../assets/bundles/dataTables.bundle.js"></script>
+    <script src="../assets/plugins/sweetalert/sweetalert.min.js"></script>
+    
+    <!-- Start project main js  and page js -->
+    <script src="../assets/js/core.js"></script>
+    <script src="assets/js/table/datatable.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/page/payments.js"></script>
+    </body>
+    </html>`;
+    let ifram = document.createElement("iframe");
+    ifram.style = "display:none";
+    document.body.appendChild(ifram);
+    const pri = ifram.contentWindow;
+    pri.document.open();
+    pri.document.write(header+document.getElementById('id-card-wrapper').innerHTML+footer);
+    pri.document.close();
+    pri.focus();
+    pri.print();
+  }
+
   render() {
       return(
       <div className="page">
@@ -781,7 +829,7 @@ class Students extends AbstractComponent {
                 <div className="container" id="id-card">
                   <div className="d-flex justify-content-between">
                     <div className="h4">Identity Card</div>
-                    <button className="ml-auto btn btn-primary" onclick="return printIdCard()"
+                    <button className="ml-auto btn btn-primary" onClick={this.printIdCard}
                       disabled={!this.state.selectedStudentForIdCard}>Print</button>
                   </div>
                   {!this.state.selectedStudentForIdCard ?

@@ -1,8 +1,5 @@
 $(document).ready(function(){
     $('#admission-form').validate();
-    $('.datepicker').each((index, picker) => {
-        $(picker).datepicker();
-    });
 });
 
 function addStudentToTable(student) {
