@@ -1,5 +1,6 @@
 // production url
-const baseUrl = 'https://lms.dabinventive.com/api/';
+const baseurl = 'https://lms.dabinventive.com/';
 // local url
-// const baseUrl = 'https://localhost:44399/api/';
-export default baseUrl;
+// const baseurl = 'https://localhost:44399/';
+const apiurl = baseurl+'api/';
+export {baseurl, apiurl};

@@ -1,22 +1,7 @@
 $(document).ready(function(){
     $('#admission-form').validate();
-    
-    // toggleLoading(true);
-    fetch(apiUrl+'student')
-    .then(res => res.json())
-    .then(res => {
-        // toggleLoading(false);
-        if(!res || !res.length) {
-            $('#no-student-data').html('No Data Available');
-        }
-        res.forEach(student => {
-            addStudentToTable(student);
-        });
-        populateClassPicklist();
-    }).catch(err => {
-        toggleLoading(false);
-        swal('Something went wrong!', (err.message ? err.message : err),'error');
-        populateClassPicklist();
+    $('.datepicker').each((index, picker) => {
+        $(picker).datepicker();
     });
 });
 
