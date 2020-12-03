@@ -1,0 +1,70 @@
+.leave-certi {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+.leave-certi input {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.leave-certi input:focus {
+        outline: none;
+    }
+
+.leave-certi .wrapper {
+    width: 800px;
+    margin: auto;
+    padding: 20px 0px;
+}
+
+.leave-certi .date {
+    width: 300 px;
+    float: right;
+}
+
+    .leave-certi .date > div {
+        float: right;
+    }
+
+    .leave-certi .date input {
+        border: none;
+        border-bottom: 1px solid #000;
+        padding: 4px 6px;
+        width: 20px;
+    }
+
+        .leave-certi .date input:last-child {
+            width: 40px;
+        }
+
+.leave-certi .wrapper_body h3 {
+    text-align: center;
+    margin-top: 140px;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 24px;
+}
+
+.leave-certi .wrapper_body p {
+    line-height: 36px;
+    font-weight: bold;
+}
+
+.leave-certi .txt_fld {
+    border: none;
+    border-bottom: 1px solid #000;
+    padding: 4px 6px;
+}
+
+.sign {
+    font-size: 22px;
+    margin-top: 120px;
+}
+.btn-style{
+    margin-top:20px;
+    float:right;
+    margin-right:10px;
+}
