@@ -1,5 +1,6 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
+import Discharge from '../discharge/discharge.component';
 import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
 import { Link } from 'react-router-dom';
 
@@ -622,6 +623,7 @@ class Students extends AbstractComponent {
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#generate-id-card">Generate Id Card</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-profile">Profile</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Add</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-discharge">Discharge</a></li>
               </ul>
             </div>
           </div>
@@ -1564,6 +1566,7 @@ class Students extends AbstractComponent {
                   </div>
                 </div>
               </div>
+                  <Discharge></Discharge>                           
             </div>
           </div>
         </div>

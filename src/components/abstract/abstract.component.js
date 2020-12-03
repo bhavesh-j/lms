@@ -85,7 +85,7 @@ class AbstractComponent extends React.Component {
         });
     }
 
-    printDocument(divId) {
+    printDocument(divId, cssstring='') {
         const header = `<!doctype html>
         <html lang="en" dir="ltr">
         <head>
@@ -104,6 +104,7 @@ class AbstractComponent extends React.Component {
         <!-- Core css -->
         <link rel="stylesheet" href="../assets/css/style.min.css"/>
         <link rel="stylesheet" href="assets/css/styles.css"/>
+        ${cssstring}
         </head>
         
         <body class="font-muli theme-cyan gradient">`;
