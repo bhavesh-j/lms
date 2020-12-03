@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function SidePanel() {
     return (
         <div id="main_content">
-            <div id="overlay">
+            <div id="overlay" style={{zIndex: 100}}>
                 <span id="nav">
                     <div className="spinner" style={{display: 'block', position: 'fixed'}}>
                     </div>
@@ -764,7 +764,7 @@ function SidePanel() {
                                 <li className="active"><Link to="/"><i className="fa fa-dashboard"></i><span>Dashboard</span></Link></li>
                                 <li><a href="professors.html"><i className="fa fa-black-tie"></i><span>Professors</span></a></li>
                                 <li><a href="staff.html"><i className="fa fa-user-circle-o"></i><span>Staff</span></a></li>
-                                <li><Link to="students"><i className="fa fa-users"></i><span>Students</span></Link></li>
+                                <li><Link to="/students"><i className="fa fa-users"></i><span>Students</span></Link></li>
                                 <li><a href="departments.html"><i className="fa fa-users"></i><span>Departments</span></a></li>
                                 <li><a href="courses.html"><i className="fa fa-graduation-cap"></i><span>Courses</span></a></li>                        
                                 <li><a href="library.html"><i className="fa fa-book"></i><span>Library</span></a></li>
@@ -782,7 +782,7 @@ function SidePanel() {
                     <div className="tab-pane" id="menu-admin" role="tabpanel">
                         <nav className="sidebar-nav">
                             <ul className="metismenu">
-                                <li><Link to="payments"><i className="fa fa-credit-card"></i><span>Payments</span></Link></li>
+                                <li><Link to="/payments"><i className="fa fa-credit-card"></i><span>Payments</span></Link></li>
                                 <li><a href="noticeboard.html"><i className="fa fa-dashboard"></i><span>Noticeboard</span></a></li>
                                 <li><a href="taskboard.html"><i className="fa fa-list-ul"></i><span>Taskboard</span></a></li>
                                 <li><a href="hostel.html"><i className="fa fa-bed"></i><span>Hostel</span></a></li>

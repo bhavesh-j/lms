@@ -15,10 +15,12 @@ class Main extends Component {
                 <Route exact path="/" component={Home} />
                 <Route exact path="/students" component={Students} />
                 <Route exact path="/payments" component={Payments}/>
-                <Route exact path="/edit-student" component={() => <EditStudent readOnly={false}/>}/>
-                <Route exact path="/view-student" component={() => <EditStudent readOnly={true}/>}/>
+                <Route exact path="/edit-student/:studentId" component={(props) =>
+                    <EditStudent history={props.history} match={props.match} readOnly={false}/>}/>
+                <Route exact path="/view-student/:studentId" component={(props) =>
+                    <EditStudent history={props.history} match={props.match} readOnly={true}/>}/>
                 <Route path="/not-found" component={NotFound} />
-                <Redirect to="not-found" />
+                {/* <Redirect to="not-found" /> */}
             </>
         );
     }

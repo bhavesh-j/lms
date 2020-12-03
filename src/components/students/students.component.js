@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 function StateDropdown(props) {
   return (
-    <select readOnly={props.readOnly} className="form-control input-height" name={props.name}
+    <select disabled={props.readOnly} className="form-control input-height" name={props.name}
       value={props.value} onChange={props.onChange} required>
       <option value="" disabled selected>Select State</option>
       <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -50,7 +50,7 @@ function StateDropdown(props) {
 
 function AcademicYear(props) {
   return (
-    <select readOnly={props.readOnly} className="form-control input-height" name={props.name} required>
+    <select disabled={props.readOnly} className="form-control input-height" name={props.name} required>
       <option value>Select Year</option>
       <option value="2020">2020</option>
       <option value="2019">2019</option>
@@ -692,8 +692,8 @@ class Students extends AbstractComponent {
                                 <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
 								                <td>{student.emergencyContact.mobileNo}</td>
                                 <td>
-                                    <Link to="view-student"><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
-                                    <Link to="edit-student"><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
+                                    <Link to={"view-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
+                                    <Link to={"edit-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
                                     <button type="button" className="btn btn-icon btn-sm js-sweetalert" title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"></i></button>
                                 </td>
                             </tr>
@@ -1178,7 +1178,7 @@ class Students extends AbstractComponent {
                               <label className="col-md-3 col-form-label">Class Section</label>
                               <div className="col-md-9">
                                 <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
-                                  handleInputChange={this.handleInputChange} />
+                                  handleInputChange={this.handleInputChange} value={this.state.studentForm.classSection} />
                               </div>
                             </div>
                             <div className="form-group row">
@@ -1332,7 +1332,7 @@ class Students extends AbstractComponent {
                             <br />
                             <div className="form-check">
                               <input type="checkbox" className="form-check-input"
-                                value={this.state.studentFormResources.permanentAndPresentAddressSame}
+                                checked={this.state.studentFormResources.permanentAndPresentAddressSame}
                                 onChange={(event) => this.handleInputChange(event, 'studentFormResources.permanentAndPresentAddressSame')}
                                 id="same-address" />
                               <label className="form-check-label" htmlFor="same-address">Present Address Same as Permanent Address</label>

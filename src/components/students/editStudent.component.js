@@ -1,92 +1,285 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
-import SelectClass from '../selectclass/selectclass.component';
-import { Link } from 'react-router-dom';
-import {AcademicYear, StateDropdown} from "../students/students.component";
+import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
+// import { Link } from 'react-router-dom';
+import {StateDropdown} from "../students/students.component";
 
 class EditStudent extends AbstractComponent {
     constructor(){
         super();
         this.state = {
-            readOnly:true,
-            students: [],
-      classes: [],
-      studentForm: {
-        firstName: '',
-        lastName: '',
-        admissionForClass: '',
-        classSection: '',
-        dateOfBirth: '',
-        placeOfBirth: '',
-        nationality: '',
-        gender: '',
-        permanentAddress: {
-          street: '',
-          city: '',
-          state: '',
-          pincode: ''
-        },
-        caste: 'General',
-        motherTongue: '',
-        aadharNo: '',
-        relegion: '',
-        bloodGroup: 'A+',
-        presentAddress: {
-          street: '',
-          city: '',
-          state: '',
-          pincode: ''
-        },
-        photo: '',
-        parents: []
-      },
-      studentFormResources: {
-        permanentAddress: '',
-        presentAddress: '',
-        permanentAndPresentAddressSame: false,
-        father: {
-          name: '',
-          qualification: '',
-          occupation: '',
-          mobileNo: '',
-          email: '',
-          relationToStudent: 'Father'
-        },
-        mother: {
-          name: '',
-          qualification: '',
-          occupation: '',
-          mobileNo: '',
-          email: '',
-          relationToStudent: 'Mother'
-        },
-        guardian: {
-          name: '',
-          qualification: '',
-          occupation: '',
-          mobileNo: '',
-          email: '',
-          relationToStudent: 'Guardian'
-        },
-        parentOrGuardian: 'Parents',
-        studentId: null
-      },
-      admissionFormErrors: [],
-      submitAdmissionFee: false,
-      feeList: [],
-      feeToPay: 0,
-      studentsSearchParam: {
-        name: '',
-        classId: ''
-      },
-      studentListForIdCard: [],
-      studentListForIdCardSearchParam: {
-        name: '',
-        classId: ''
-      },
-      showIdCard: false,
-      selectedStudentForIdCard: null
+          classes: [],
+          studentForm: {
+            id: '',
+            firstName: '',
+            lastName: '',
+            admissionForClass: '',
+            classSection: '',
+            dateOfBirth: '',
+            placeOfBirth: '',
+            nationality: '',
+            gender: '',
+            permanentAddress: {
+              street: '',
+              city: '',
+              state: '',
+              pincode: ''
+            },
+            caste: 'General',
+            motherTongue: '',
+            aadharNo: '',
+            relegion: '',
+            bloodGroup: 'A+',
+            presentAddress: {
+              street: '',
+              city: '',
+              state: '',
+              pincode: ''
+            },
+            photo: '',
+            parents: []
+          },
+          studentFormResources: {
+            permanentAddress: '',
+            presentAddress: '',
+            permanentAndPresentAddressSame: false,
+            father: {
+              name: '',
+              qualification: '',
+              occupation: '',
+              mobileNo: '',
+              email: '',
+              relationToStudent: 'Father',
+              photo: 'uploads/default.png'
+            },
+            mother: {
+              name: '',
+              qualification: '',
+              occupation: '',
+              mobileNo: '',
+              email: '',
+              relationToStudent: 'Mother',
+              photo: 'uploads/default.png'
+            },
+            guardian: {
+              name: '',
+              qualification: '',
+              occupation: '',
+              mobileNo: '',
+              email: '',
+              relationToStudent: 'Guardian',
+              photo: 'uploads/default.png'
+            },
+            parentOrGuardian: 'Parents',
+            studentId: null,
+            prevAadharNo: null
+          },
+          admissionFormErrors: [],
+          submitAdmissionFee: false,
+          feeList: [],
+          feeToPay: 0,
+          studentsSearchParam: {
+            name: '',
+            classId: ''
+          },
+          studentListForIdCard: [],
+          studentListForIdCardSearchParam: {
+            name: '',
+            classId: ''
+          },
+          showIdCard: false,
+          selectedStudentForIdCard: null,
         };
+        this.handleStudentUpdate = this.handleStudentUpdate.bind(this);
+    }
+
+    componentDidMount() {
+      const studentId = this.props.match.params.studentId;
+      this.toggleLoading(true);
+      this.fetchClasses()
+      .then(classes => {
+        this.setState({classes: classes});
+        this.callServerMethod('student/'+studentId+'/details')
+        .then(student => {
+          if(!student.Message) {
+            const father = student.parents.filter(parent => parent.relationToStudent==='Father')[0];
+            const mother = student.parents.filter(parent => parent.relationToStudent==='Mother')[0];
+            const guardian = student.parents.filter(parent => parent.relationToStudent==='Guardian')[0];
+            this.setState({
+              studentForm: {
+                id: this.props.match.params.studentId,
+                firstName: student.firstName,
+                lastName: student.lastName,
+                admissionForClass: student.admissionForClass,
+                classSection: student.classSection,
+                dateOfBirth: student.dateOfBirth.split('T')[0],
+                placeOfBirth: student.placeOfBirth,
+                nationality: student.nationality,
+                gender: student.gender,
+                permanentAddress: student.permanentAddress,
+                caste: student.caste,
+                relegion: student.relegion,
+                presentAddress: student.presentAddress,
+                motherTongue: student.motherTongue,
+                aadharNo: student.aadharNo,
+                photo: student.photo,
+                bloodGroup: student.bloodGroup,
+                parents: student.parents
+              },
+              studentFormResources: {
+                permanentAddress: student.permanentAddress.street+' '+student.permanentAddress.city,
+                presentAddress: student.presentAddress.street+' '+student.presentAddress.city,
+                permanentAndPresentAddressSame: JSON.stringify(student.permanentAddress)===JSON.stringify(student.presentAddress),
+                father: {
+                  name: father ? father.firstName+' '+father.lastName : null,
+                  qualification: father ? father.qualification : null,
+                  occupation: father ? father.occupation : null,
+                  mobileNo: father ? father.mobileNo : null,
+                  email: father ? father.email : null,
+                  relationToStudent: 'Father',
+                  photo: father ? father.photo : null,
+                },
+                mother: {
+                  name: mother ? mother.firstName+' '+mother.lastName : null,
+                  qualification: mother ? mother.qualification : null,
+                  occupation: mother ? mother.occupation : null,
+                  mobileNo: mother ? mother.mobileNo : null,
+                  email: mother ? mother.email : null,
+                  relationToStudent: 'Mother',
+                  photo: mother ? mother.photo : null,
+                },
+                guardian: {
+                  name: guardian ? guardian.firstName+' '+guardian.lastName : null,
+                  qualification: guardian ? guardian.qualification : null,
+                  occupation: guardian ? guardian.occupation : null,
+                  mobileNo: guardian ? guardian.mobileNo : null,
+                  email: guardian ? guardian.email : null,
+                  relationToStudent: 'Gaurdian',
+                  photo: guardian ? guardian.photo : null,
+                },
+                parentOrGuardian: (student.parents[0].relationToStudent !== 'Guardian' ? 'Parents' : 'Guardian'),
+                studentId: studentId
+              }
+            },() => this.toggleLoading(true));
+          }
+        })
+      }).catch(err => console.log(err));
+    }
+
+    handleStudentUpdate(event) {
+      event.preventDefault();
+      this.toggleLoading(true);
+      this.setState({ admissionFormErrors: [] });
+      const permanentAddress = this.state.studentFormResources.permanentAddress.split(',');
+      const admissionForm = this.copyObject(this.state.studentForm);
+      admissionForm.permanentAddress.street = (permanentAddress.length > 1 ?
+        permanentAddress.slice(0, permanentAddress.length - 1).join(',').trim()
+        : permanentAddress.join(',').trim());
+      admissionForm.permanentAddress.city = (permanentAddress.length > 1 ?
+        permanentAddress[permanentAddress.length - 1].trim()
+        : null);
+
+      if (this.state.studentFormResources.permanentAndPresentAddressSame) {
+        admissionForm.presentAddress = admissionForm.permanentAddress;
+      } else {
+        const presentAddress = this.state.studentFormResources.presentAddress.split(',');
+        admissionForm.presentAddress.street = (presentAddress.length > 1 ?
+          presentAddress.slice(0, presentAddress.length - 1).join(',').trim()
+          : presentAddress.join(',').trim());
+        admissionForm.presentAddress.city = (presentAddress.length > 1 ?
+          presentAddress[presentAddress.length - 1].trim()
+          : null);
+      }
+      admissionForm.classSection = Number(admissionForm.classSection);
+      const photos = new FormData();
+      const studentPhoto = document.getElementById('student-photo');
+      if (studentPhoto.files && studentPhoto.files[0]) {
+        photos.append('student', studentPhoto.files[0]);
+      }
+      admissionForm.parents = [];
+      if (this.state.studentFormResources.parentOrGuardian === 'Parents') {
+        const fatherPhoto = document.getElementById('father-photo');
+        if (fatherPhoto.files && fatherPhoto.files[0]) {
+          photos.append('Father', fatherPhoto.files[0]);
+        }
+        admissionForm.parents.push(this.state.studentFormResources.father);
+        const motherPhoto = document.getElementById('mother-photo');
+        if (motherPhoto.files && motherPhoto.files[0]) {
+          photos.append('Mother', motherPhoto.files[0]);
+        }
+        admissionForm.parents.push(this.state.studentFormResources.mother);
+      } else {
+        const guardianPhoto = document.getElementById('guardian-photo');
+        if (guardianPhoto.files && guardianPhoto.files[0]) {
+          photos.append('Guardian', guardianPhoto.files[0]);
+        }
+        admissionForm.parents.push(this.state.studentFormResources.guardian);
+      }
+      admissionForm.dateOfBirth = new Date(admissionForm.dateOfBirth);
+      for (let i in admissionForm.parents) {
+        const fullname = admissionForm.parents[i].name.split(' ');
+        admissionForm.parents[i].firstName = fullname[0];
+        admissionForm.parents[i].lastName = fullname[1];
+      }
+
+      this.callServerMethod('student/validate-admission-form-resources', 'POST', {
+        'Content-Type': 'application/json'
+      }, JSON.stringify(admissionForm)).then(res => {
+        this.toggleLoading(false);
+        if (typeof res === 'boolean') {
+          if (res) {
+            this.toggleLoading(true);
+            this.callServerMethod('fileupload', 'POST', null, photos).then(urls => {
+              if(urls.student) admissionForm.photo = urls.student;
+              for (let index = 0; index < admissionForm.parents.length; index++) {
+                if(urls[admissionForm.parents[index].relationToStudent])
+                  admissionForm.parents[index].photo = urls[admissionForm.parents[index].relationToStudent];
+              }
+              return this.callServerMethod('student/edit', 'POST', {
+                'Content-Type': 'application/json'
+              }, JSON.stringify(admissionForm));
+            }).then(res => {
+              this.toggleLoading(false);
+              console.log(res);
+              if (res.success) {
+                alert('Form Submittes Form is successfully submitted success');
+                this.props.history.goBack();
+              } else {
+                let listErrors = [];
+                if (res.message) {
+                  listErrors.push(res.message);
+                } else {
+                  for (let key in res) {
+                    res[key]._errors.forEach(msg => {
+                      listErrors.push(msg['<ErrorMessage>k__BackingField']);
+                    });
+                  }
+                }
+                this.setState({ admissionFormErrors: listErrors });
+                this.scrollTop();
+              }
+            }).catch(err => console.log(err));
+          } else {
+            this.setState({
+              admissionFormErrors: [`Aadhar Number ${admissionForm.aadharNo} already exists.`]
+            });
+            this.scrollTop();
+          }
+        } else {
+          let listErrors = [];
+          if (res.message) {
+            listErrors.push(res.message);
+          } else {
+            for (let key in res) {
+              res[key]._errors.forEach(msg => {
+                listErrors.push(msg['<ErrorMessage>k__BackingField']);
+              });
+            }
+          }
+          this.setState({ admissionFormErrors: listErrors });
+          this.scrollTop();
+        }
+      }).catch(err => console.log(err));
     }
 
     render() {
@@ -292,7 +485,7 @@ class EditStudent extends AbstractComponent {
                           </ul>
                         </div>
                       </div>
-                      <form onSubmit={this.handleAdmissionFormSubmit} noValidate="novalidate" id="admission-form">
+                      <form onSubmit={this.handleStudentUpdate} noValidate="novalidate" id="admission-form">
                         <div className="d-flex card-body">
                           <div className="col-12 col-md-6">
                             <div className="form-group row">
@@ -323,14 +516,12 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Class Section</label>
                               <div className="col-md-9">
-                                <select readOnly={this.props.readOnly} name="class-section" id="class-section-select"
+                                <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.classSection')}
-                                  value={this.state.studentForm.classSection} className="form-control">
-                                  <option disabled selected value>Select</option>
-                                </select>
+                                  readOnly={this.props.readOnly} value={this.state.studentForm.classSection} />
                               </div>
                             </div>
-                            <div className="form-group row">
+                            {/* <div className="form-group row">
                               <label className="col-md-3 col-form-label">Academic Year</label>
                               <div className="col-md-4">
                                 <AcademicYear readOnly ={this.props.readOnly} name="start_year"></AcademicYear>
@@ -338,7 +529,7 @@ class EditStudent extends AbstractComponent {
                               <div className="col-md-4">
                                 <AcademicYear readOnly ={this.props.readOnly} name="end_year"></AcademicYear>
                               </div>
-                            </div>
+                            </div> */}
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Date of Birth&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
@@ -366,7 +557,7 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Gender&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <select readOnly={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.gender}
+                                <select disabled={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.gender}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.gender')}
                                   name="gender" required>
                                   <option value>Select...</option>
@@ -406,21 +597,21 @@ class EditStudent extends AbstractComponent {
                               <label className="col-md-3 col-form-label">Caste&nbsp;<span className="text-danger">*</span></label>
                               <div className="custom-control custom-radio custom-control-inline">
                                 <input type="radio" className="custom-control-input" value="General" id="generalCaste" name="caste"
-                                  checked={this.state.studentForm.caste === 'General'}
+                                  checked={this.state.studentForm.caste === 'General'} disabled={this.props.readOnly}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.caste')} />
                                 <label className="custom-control-label" htmlFor="generalCaste">General</label>
                               </div>
                               {/* Default inline 2*/}
                               <div className="custom-control custom-radio custom-control-inline">
                                 <input type="radio" className="custom-control-input" value="OBC" id="obcCaste" name="caste"
-                                  checked={this.state.studentForm.caste === 'OBC'}
+                                  checked={this.state.studentForm.caste === 'OBC'} disabled={this.props.readOnly}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.caste')} />
                                 <label className="custom-control-label" htmlFor="obcCaste">OBC</label>
                               </div>
                               {/* Default inline 3*/}
                               <div className="custom-control custom-radio custom-control-inline">
                                 <input type="radio" className="custom-control-input" value="SC/ST" id="scstCaste" name="caste"
-                                  checked={this.state.studentForm.caste === 'SC/ST'}
+                                  checked={this.state.studentForm.caste === 'SC/ST'} disabled={this.props.readOnly}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.caste')} />
                                 <label className="custom-control-label" htmlFor="scstCaste">SC/ST</label>
                               </div>
@@ -438,7 +629,8 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Student Photo</label>
                               <div className="col-md-5 height-100">
-                                <input type="file" className name="student-photo" id="student-photo" />
+                                <img src={baseurl + (this.state.studentForm.photo ? this.state.studentForm.photo : 'uploads/default.jpg')} className="img-responsive img-thumbnail" alt="Profile" />
+                                <input type="file" className="mt-2 ml-1" name="student-photo" id="student-photo" disabled={this.props.readOnly} />
                               </div>
                             </div>
                             <div className="form-group row">
@@ -452,7 +644,7 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Religion&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <select readOnly={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.relegion}
+                                <select disabled={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.relegion}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.relegion')}
                                   name="religion" required>
                                   <option>Select Religion</option>
@@ -468,7 +660,7 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Blood Group&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <select readOnly={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.bloodGroup}
+                                <select disabled={this.props.readOnly} className="form-control input-height" value={this.state.studentForm.bloodGroup}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.bloodGroup')}
                                   name="blood_group" required>
                                   <option value="A+" selected>A+</option><option value="A-">A-</option>
@@ -480,8 +672,8 @@ class EditStudent extends AbstractComponent {
                             </div>
                             <br />
                             <div className="form-check">
-                              <input type="checkbox" className="form-check-input"
-                                value={this.state.studentFormResources.permanentAndPresentAddressSame}
+                              <input type="checkbox" className="form-check-input" disabled={this.props.readOnly}
+                                checked={this.state.studentFormResources.permanentAndPresentAddressSame}
                                 onChange={(event) => this.handleInputChange(event, 'studentFormResources.permanentAndPresentAddressSame')}
                                 id="same-address" />
                               <label className="form-check-label" htmlFor="same-address">Present Address Same as Permanent Address</label>
@@ -523,17 +715,17 @@ class EditStudent extends AbstractComponent {
                           <div className="row">
                             <div className="col-12 col-md-12">
                               <div className="row">
-                                <div className="form-group row col-6">
-                                  <label className="col-md-4 col-form-label">Enter Information for: </label>
-                                  <div className="col-md-8">
+                                {/* <label className="col-md-4 col-form-label">Enter Information for: </label> */}
+                                  {/* <div className="col-md-8">
                                     <select value={this.state.studentFormResources.parentOrGuardian}
                                       onChange={(event) => this.handleInputChange(event, 'studentFormResources.parentOrGuardian')}
                                       className="form-control custom-select" required>
                                       <option selected value="Parents">Parents</option>
                                       <option value="Guardian">Guardian</option>
                                     </select>
-                                  </div>
-                                </div>
+                                  </div> */}
+                                </div> <div className="form-group row col-6">
+                                 
                               </div>
                               {this.state.studentFormResources.parentOrGuardian === 'Parents' ?
                                 <>
@@ -541,7 +733,10 @@ class EditStudent extends AbstractComponent {
                                     <div className="form-group row col-6">
                                       <label className="col-md-3 col-form-label">Father's Photo</label>
                                       <div className="col-md-5 height-100">
-                                        <input type="file" name="father-photo" id="father-photo" className />
+                                      <img src={baseurl + (this.state.studentFormResources.father.photo 
+                                          ? this.state.studentFormResources.father.photo : 'uploads/default.jpg')}
+                                          className="img-responsive img-thumbnail" alt="Profile" />
+                                        <input type="file" name="father-photo" id="father-photo" disabled={this.props.readOnly} className="mt-2 ml-1" />
                                       </div>
                                     </div>
                                     <div className="col-6">
@@ -595,7 +790,10 @@ class EditStudent extends AbstractComponent {
                                     <div className="form-group row col-6">
                                       <label className="col-md-3 col-form-label">Mother's Photo</label>
                                       <div className="col-md-5 height-100">
-                                        <input type="file" name="mother-photo" id="mother-photo" className />
+                                        <img src={baseurl + (this.state.studentFormResources.mother.photo 
+                                          ? this.state.studentFormResources.mother.photo : 'uploads/default.jpg')}
+                                          className="img-responsive img-thumbnail" alt="Profile" />
+                                        <input type="file" name="mother-photo" id="mother-photo" disabled={this.props.readOnly} className="mt-2 ml-1" />
                                       </div>
                                     </div>
                                     <div className="col-6">
@@ -651,8 +849,11 @@ class EditStudent extends AbstractComponent {
                                   <div className="form-group row col-6">
                                     <label className="col-md-3 col-form-label">Guardian's Photo</label>
                                     <div className="col-md-5 height-100">
-                                      <input type="file" name="guardian-photo"
-                                        id="guardian-photo" />
+                                        <img src={baseurl + (this.state.studentFormResources.guardian.photo 
+                                          ? this.state.studentFormResources.guardian.photo : 'uploads/default.jpg')}
+                                          className="img-responsive img-thumbnail" alt="Profile" />
+                                      <input type="file" name="guardian-photo" disabled={this.props.readOnly}
+                                        id="guardian-photo" className="mt-2 ml-1" />
                                     </div>
                                   </div>
                                   <div className="col-6">
@@ -706,7 +907,9 @@ class EditStudent extends AbstractComponent {
                               }
                             </div>
                           </div>
-                          <button type="submit" className="btn btn-primary btn-lg btn-block">Submit Your Admission Form</button>
+                          {!this.props.readOnly ?
+                            <button type="submit" className="btn btn-primary btn-lg btn-block">Update Info</button>
+                          : null}
                         </div>
                       </form>
                     </div>

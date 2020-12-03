@@ -28,9 +28,10 @@ class AbstractComponent extends React.Component {
 
     toggleLoading(showLoading) {
         if(showLoading) {
-            document.getElementById("overlay").style.display = "block";
+            document.getElementsByClassName("page-loader-wrapper")[0].style.display = "block";
+            setTimeout(() => this.toggleLoading(false), '10s');
         } else {
-            document.getElementById("overlay").style.display = "none";
+            document.getElementsByClassName("page-loader-wrapper")[0].style.display = "none";
         }
     }
 
