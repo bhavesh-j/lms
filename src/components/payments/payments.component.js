@@ -146,18 +146,11 @@ class Payments extends AbstractComponent {
         feeStructures[field.name] = field.value;
     }
     this.toggleLoading(true);
-    fetch('https://lms.dabinventive.com/feestructure/update-structures', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(feeStructures)
-    }).then(res => res.text())
-    .then(res => console.log(res));
-    this.callServerMethod('feestructure/update-structures', 'PUT', {
+    this.callServerMethod('feestructure/update-structures', 'POST', {
       'Content-Type': 'application/json'
     }, JSON.stringify(feeStructures))
     .then(feeData => {
+      console.log(feeData);
       this.toggleLoading(false);
       console.log('Success', 'Fee information updated successfully!', 'success');
       this.setState({feeMasterStructures: feeData});
@@ -720,7 +713,7 @@ class Payments extends AbstractComponent {
                         return (
                           <tr key={student.id}>
                             <td class="w-60">
-                                <img class="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                                <img class="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
                             </td>
                             <td>{student.fullName}</td>
                             <td>{student.className}</td>
