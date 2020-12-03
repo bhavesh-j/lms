@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 function StateDropdown(props) {
   return (
-    <select readOnly ={props.readOnly} className="form-control input-height" name={props.name}
+    <select readOnly={props.readOnly} className="form-control input-height" name={props.name}
       value={props.value} onChange={props.onChange} required>
       <option value>Select State</option>
       <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -50,7 +50,7 @@ function StateDropdown(props) {
 
 function AcademicYear(props) {
   return (
-    <select readOnly ={props.readOnly} className="form-control input-height" name={props.name} required>
+    <select readOnly={props.readOnly} className="form-control input-height" name={props.name} required>
       <option value>Select Year</option>
       <option value="2020">2020</option>
       <option value="2019">2019</option>
@@ -671,6 +671,11 @@ class Students extends AbstractComponent {
                         <th></th>
                       </tr>
                     </thead>
+                    <div class="d-flex justify-content-center">
+                      <div class="spinner-border text-info my-5" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                    </div>
                     <tbody>
                       {this.state.students.map(student => {
                         return (
@@ -1592,4 +1597,4 @@ class Students extends AbstractComponent {
 }
 
 export default Students;
-export {AcademicYear,StateDropdown};
+export { AcademicYear, StateDropdown };
