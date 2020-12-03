@@ -13,4 +13,22 @@ function SelectClass(props) {
     );
 }
 
+function SelectClassSection(props) {
+  const classFilter = props.classes.filter(classRecord => classRecord.id === Number(props.selectedClass));
+  const sectionList = classFilter.length ? classFilter[0].sections : [];
+  return (
+    <select name="class-section" id="class-section-select"
+      onChange={(event) => props.handleInputChange(event, 'studentForm.classSection')}
+      value={props.classSection} className="form-control">
+      <option selected value="">Select...</option>
+      {sectionList.map(section => {
+        return (
+        <option key={section.id} value={section.id}>{section.name}</option>
+        );
+      })}
+    </select>
+  );
+}
+
 export default SelectClass;
+export {SelectClassSection};

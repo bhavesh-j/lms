@@ -1,12 +1,12 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
-import SelectClass from '../selectclass/selectclass.component';
+import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
 
 function StateDropdown(props) {
   return (
     <select className="form-control input-height" name={props.name}
       value={props.value} onChange={props.onChange} required>
-      <option value>Select State</option>
+      <option value="" disabled selected>Select State</option>
       <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
       <option value="Andhra Pradesh">Andhra Pradesh</option>
       <option value="Arunachal Pradesh">Arunachal Pradesh</option>
@@ -289,7 +289,8 @@ class Students extends AbstractComponent {
                     dateOfBirth: admissionForm.dateOfBirth,
                     gender: admissionForm.gender,
                     dateOfAdmission: new Date().toUTCString(),
-                    photo: admissionForm.photo
+                    photo: admissionForm.photo,
+                    emergencyContact: admissionForm.parents[0]
                 });
                 this.setState({
                   students: students,
@@ -674,15 +675,15 @@ class Students extends AbstractComponent {
                           return (
                             <tr key={student.id}>
                                 <td className="w-60">
-                                    <img className="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                                    <img className="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
                                 </td>
                                 <td>{student.id}</td>
                                 <td>{student.firstName} {student.lastName}</td>
                                 <td>{student.className} {student.sectionName?('('+student.sectionName+')'):''}</td>
                                 <td>{new Date(student.dateOfBirth).toDateString()}</td>
                                 <td>{student.gender}</td>
-                                <td>-- To be added --</td>
-                                <td>-- To be added --</td>
+                                <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
+								<td>{student.emergencyContact.mobileNo}</td>
                                 <td>
                                     <button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button>
                                     <button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button>
@@ -748,7 +749,7 @@ class Students extends AbstractComponent {
                         return (
                           <tr key={student.id}>
                               <td className="w-60">
-                                  <img className="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                                  <img className="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
                               </td>
                               <td>{student.id}</td>
                               <td>{student.firstName} {student.lastName}</td>
@@ -783,15 +784,19 @@ class Students extends AbstractComponent {
                   </div> :
                   <div className="wrapper" id="id-card-wrapper">
                     <div className="identityCard">
-                      <header className="identityCard__header">
-                        School Identity Card
+                      <header className="identityCard__header d-flex flex-column text-center">
+						<div>
+						{/*<img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Bavarian_Intl_School_Logo.png" style={{width: 10}}/>*/}
+							Bavarian International School
+						</div>
+                        <div>Identity Card</div>
                           </header>
                       <div className="identityCard__profile">
                         {/* <div class="identityCard__identity">
                                                 <strong>Carte nationale d'identité n° :</strong> {id}
                                             </div> */}
                         <div className="identityCard__visual">
-                          <img src={this.state.selectedStudentForIdCard.photo || baseurl+'uploads/default.jpg'}
+                          <img src={baseurl+(this.state.selectedStudentForIdCard.photo ? this.state.selectedStudentForIdCard.photo : 'uploads/default.jpg')}
                             alt="" />
                         </div>
                         <ul className="identityCard__list list-unstyled">
@@ -799,12 +804,12 @@ class Students extends AbstractComponent {
                           <li><strong>Class :</strong> {this.state.selectedStudentForIdCard.className+(this.state.selectedStudentForIdCard.sectionName ? ' ('+this.state.selectedStudentForIdCard.sectionName+')':'')}</li>
                           <li><strong>Gender :</strong> {this.state.selectedStudentForIdCard.gender}</li>
                           <li><strong>Date of birth :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfBirth).toDateString()}</li>
-                          <li><strong>Date of Admission :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfAdmission).toDateString()}</li>
+                          <li><strong>Emergency Contact Number :</strong> {this.state.selectedStudentForIdCard.emergencyContact.mobileNo}</li>
                           <li><strong>Blood Group :</strong> {this.state.selectedStudentForIdCard.bloodGroup}</li>
                         </ul>
                       </div>
                       <footer className="identityCard__footer">
-                        <div className="filled"><span>Emergency Number: +91 9876543210</span></div>
+                        <div className="filled"><span>133 Anywhere Street, City, +1 141 654 7890</span></div>
                         {/* <div class="filled"><span>{School Address}</span></div> */}
                       </footer>
                     </div>
@@ -1168,11 +1173,8 @@ class Students extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Class Section</label>
                               <div className="col-md-9">
-                                <select name="class-section" id="class-section-select"
-                                  onChange={(event) => this.handleInputChange(event, 'studentForm.classSection')}
-                                  value={this.state.studentForm.classSection} className="form-control">
-                                  <option disabled selected value>Select</option>
-                                </select>
+                                <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
+                                  handleInputChange={this.handleInputChange} />
                               </div>
                             </div>
                             <div className="form-group row">
@@ -1300,7 +1302,7 @@ class Students extends AbstractComponent {
                                 <select className="form-control input-height" value={this.state.studentForm.relegion}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.relegion')}
                                   name="religion" required>
-                                  <option>Select Religion</option>
+                                  <option value="" disabled selected>Select Religion</option>
                                   <option value="Hindu">Hindu</option>
                                   <option value="mMslim">Muslim</option>
                                   <option value="Christian">Christian</option>
@@ -1431,7 +1433,7 @@ class Students extends AbstractComponent {
                                       <input type="text" name="father-email"
                                         value={this.state.studentFormResources.father.email}
                                         onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.email')}
-                                        className="form-control" required placeholder="Enter Email" />
+                                        className="form-control" placeholder="Enter Email" />
                                     </div>
                                   </div>
                                 </div>
@@ -1486,7 +1488,7 @@ class Students extends AbstractComponent {
                                       <input type="text" name="mother-email"
                                         value={this.state.studentFormResources.mother.email}
                                         onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.email')}
-                                        className="form-control" required placeholder="Enter Email" />
+                                        className="form-control" placeholder="Enter Email" />
                                     </div>
                                   </div>
                                 </div>
