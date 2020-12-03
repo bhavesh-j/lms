@@ -1,5 +1,6 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
+import SelectClass from '../selectclass/selectclass.component';
 
 function StateDropdown(props) {
   return (
@@ -80,21 +81,6 @@ function AcademicYear(props) {
       <option value="1992">1992</option>
       <option value="1991">1991</option>
       <option value="1990">1990</option>
-    </select>
-  );
-}
-
-function SelectClass(props) {
-  const conditionForDisablity = !props.classes.length && props.disabledFirst;
-  return (
-    <select className={"form-control input-height class-select "+(conditionForDisablity ? 'disabled' : '')}
-      name="class" value={props.value} onChange={props.onChange} id={props.id}>
-      <option selected disabled={conditionForDisablity}>Select Class...</option>
-      {props.classes.map(classRecord => {
-        return (
-        <option value={classRecord.id} key={classRecord.id}>{classRecord.name}</option>
-      );
-      })}
     </select>
   );
 }
@@ -194,6 +180,7 @@ class Students extends AbstractComponent {
     this.handleSubmitFee = this.handleSubmitFee.bind(this);
     this.toggleFeeCard = this.toggleFeeCard.bind(this);
     this.generateIdCard = this.generateIdCard.bind(this);
+    this.printIdCard = this.printIdCard.bind(this);
   }
 
   componentDidMount() {
@@ -369,8 +356,8 @@ class Students extends AbstractComponent {
 
   resetAdmissionForm() {
     this.setState({
-      studentForm: this.defaultFormValues.studentForm,
-      studentFormResources: this.defaultFormValues.studentFormResources
+      studentForm: this.copyObject(this.defaultFormValues.studentForm),
+      studentFormResources: this.copyObject(this.defaultFormValues.studentFormResources)
     });
     const tagId = (id) => document.getElementById(id);
     ['student', 'father', 'mother', 'guardian'].forEach(entity => {
@@ -451,51 +438,7 @@ class Students extends AbstractComponent {
   }
 
   printIdCard() {
-    const header = `<!doctype html>
-    <html lang="en" dir="ltr">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-    <title>:: Ericsson :: Fees</title>
-    
-    <!-- Bootstrap Core and vandor -->
-    <link rel="stylesheet" href="../assets/plugins/bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="../assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatable/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/sweetalert/sweetalert.css">
-    
-    <!-- Core css -->
-    <link rel="stylesheet" href="../assets/css/style.min.css"/>
-    <link rel="stylesheet" href="assets/css/styles.css"/>
-    </head>
-    
-    <body class="font-muli theme-cyan gradient">`;
-    const footer = `<!-- Start Main project js, jQuery, Bootstrap -->
-    <script src="../assets/bundles/lib.vendor.bundle.js"></script>
-    
-    <!-- Start Plugin Js -->
-    <script src="../assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-    <script src="../assets/bundles/dataTables.bundle.js"></script>
-    <script src="../assets/plugins/sweetalert/sweetalert.min.js"></script>
-    
-    <!-- Start project main js  and page js -->
-    <script src="../assets/js/core.js"></script>
-    <script src="assets/js/table/datatable.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/page/payments.js"></script>
-    </body>
-    </html>`;
-    let ifram = document.createElement("iframe");
-    ifram.style = "display:none";
-    document.body.appendChild(ifram);
-    const pri = ifram.contentWindow;
-    pri.document.open();
-    pri.document.write(header+document.getElementById('id-card-wrapper').innerHTML+footer);
-    pri.document.close();
-    pri.focus();
-    pri.print();
+    this.printDocument('id-card-wrapper');
   }
 
   render() {

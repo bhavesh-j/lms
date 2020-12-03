@@ -1,9 +1,171 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import AbstractComponent from '../abstract/abstract.component';
+import SelectClass from '../selectclass/selectclass.component';
+import { baseurl } from '../../shared/baseurl';
 
-   function Payments() {
+class Payments extends AbstractComponent {
+  constructor() {
+    super();
+    this.state = {
+      classes: [],
+      students: [],
+      studentsSearchParam: {
+        name: '',
+        classId: ''
+      },
+      feeMasterClass: '',
+      showFeeScreen: false,
+      feeResources: null,
+      feeToPay: 0,
+      selectedFeeParams: null,
+      showReceipt: false,
+      invoice: null,
+      feeMasterStructures: []
+    }
+    this.openPayFeeScreen = this.openPayFeeScreen.bind(this);
+    this.toggleAvailed = this.toggleAvailed.bind(this);
+    this.checkFeeValidity = this.checkFeeValidity.bind(this);
+    this.getTotalFee = this.getTotalFee.bind(this);
+    this.handleSubmitFee = this.handleSubmitFee.bind(this);
+    this.printReceipt = this.printReceipt.bind(this);
+    this.handleFeeStructureRequest = this.handleFeeStructureRequest.bind(this);
+    this.handleFeeStructureUpdate = this.handleFeeStructureUpdate.bind(this);
+  }
+
+  componentDidMount() {
+    this.fetchClasses()
+    .then(classes => {
+      this.setState({classes: classes});
+      return this.handleStudentSearch(null, 'students', 'student/due-fees');
+    }).catch(err => console.log(err));
+  }
+
+  toggleAvailed(index) {
+    const feeStructure = this.state.feeResources.feeStructures;
+    feeStructure[index].availed = !feeStructure[index].availed;
+    this.setState({feeStructure: feeStructure});
+  }
+
+  openPayFeeScreen(studentId, classId) {
+    this.setState({
+      showFeeScreen: true,
+      selectedFeeParams: {
+        studentId: studentId,
+        classId: classId
+      }
+    });
+    this.callServerMethod('student/'+studentId+'/'+classId+'/fee-info')
+    .then(res => {
+      const paidFees = res.paidFees;
+      res.feeStructures.forEach((structure, index) => {
+        const paid = (paidFees[structure.id] ? paidFees[structure.id].paidAmount : 0);
+        let availed = paid!=null;
+        if(availed) {
+            if(structure.particular.toLowerCase().includes('hostel') || structure.particular.toLowerCase().includes('transport')) {
+                availed = false;
+            }
+        }
+        res.feeStructures[index].availed = availed;
+      });
+      this.setState({
+        feeResources: res,
+        selectedFeeParams: {
+          ...this.state.selectedFeeParams,
+          fullName: res.student.firstName+' '+res.student.lastName,
+          className: res.student.className
+        }
+      });
+    }).catch(err => console.log(err));
+  }
+
+  getTotalFee(key='amount') {
+    return this.state.feeResources.feeStructures.reduce((total, structure) => {
+      if(structure.availed) total += structure[key];
+      return total;
+    }, 0);
+  }
+
+  checkFeeValidity(event) {
+    const value = event.target.value;
+    if(isNaN(Number(value))) {
+      return;
+    }
+    this.setState({feeToPay: value});
+    const totalFee = this.getTotalFee();
+    const feeToPay = Number(value);
+    event.target.setCustomValidity((feeToPay > totalFee) ? "Fee amount is greate than "+totalFee+"!": "");
+  }
+
+  handleSubmitFee(event) {
+    event.preventDefault();
+    this.toggleLoading(true);
+    const hostel = document.getElementById('avail-hostel-fee')
+      ? document.getElementById('avail-hostel-fee').checked : false;
+    const transport = document.getElementById('avail-transport-fee')
+      ? document.getElementById('avail-hostel-fee').checked : false;
+    this.callServerMethod('payfee', 'POST', {
+      'Content-Type': 'application/json'
+    }, JSON.stringify({
+      classId: this.state.selectedFeeParams.classId,
+      studentId: this.state.selectedFeeParams.studentId,
+      hostel: hostel,
+      transport: transport,
+      amount: this.state.feeToPay,
+      year: new Date().getFullYear().toString()
+    })).then(res => {
+      this.toggleLoading(false);
+      console.log('Pay Successful!', res.message, 'success');
+      this.setState({
+        showReceipt: true,
+        showFeeScreen: false,
+        feeResources: null,
+        invoice: {
+          date: new Date(),
+          amount: res.payload
+        }
+      });
+    }).catch(err => console.log(err));
+  }
+
+  printReceipt() {
+    this.printDocument('invoice');
+  }
+
+  handleFeeStructureRequest(event) {
+    const classId = event.target.value;
+    this.callServerMethod('feestructure/'+classId)
+    .then(feeData => {
+      this.setState({feeMasterStructures: feeData});
+    }).catch(err => console.log(err));
+  }
+
+  handleFeeStructureUpdate(event) {
+    event.preventDefault();
+    const feeStructures = {};
+    for(let index=0;index<event.target.length;index++) {
+        const field = event.target[index];
+        feeStructures[field.name] = field.value;
+    }
+    this.toggleLoading(true);
+    fetch('https://lms.dabinventive.com/feestructure/update-structures', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(feeStructures)
+    }).then(res => res.text())
+    .then(res => console.log(res));
+    this.callServerMethod('feestructure/update-structures', 'PUT', {
+      'Content-Type': 'application/json'
+    }, JSON.stringify(feeStructures))
+    .then(feeData => {
+      this.toggleLoading(false);
+      console.log('Success', 'Fee information updated successfully!', 'success');
+      this.setState({feeMasterStructures: feeData});
+    }).catch(err => console.log(err));
+  }
+
+  render() {
     return (
-
       <div className="page">
         {/* Start Page header */}
         <div className="section-body" id="page_top">
@@ -179,6 +341,7 @@ import { Link } from 'react-router-dom';
               <ul className="nav nav-tabs page-header-tab">
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Fees-all">List</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-Receipt">Fees Receipt</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#fee-master">Fee Master</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-add">Add Fees</a></li>
               </ul>
             </div>
@@ -471,128 +634,282 @@ import { Link } from 'react-router-dom';
                   </div>
                 </div>
               </div>
+              <div className="tab-pane" id="fee-master">
+                <div className="container card">
+                  <div className="card-header row">
+                    <div className="col-12 row">
+                      <label className="col-auto font-weight-bold mt-2 mr-4"> Class</label>
+                      <div className="col-lg-4 col-md-5 col-sm-6">
+                        <SelectClass classes={this.state.classes} disabledFirst={true}
+                          value={this.state.feeMasterClass}
+                          onChange={event => {
+                            this.setState({feeMasterClass: event.target.value, feeMasterStructures: []});
+                            this.handleFeeStructureRequest(event); 
+                          }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row card-body" style={{minHeight: '30em'}}>
+                    {this.state.feeMasterClass && !this.state.feeMasterStructures.length ?
+                    <div className="col-12" id="fee-structure-loading">
+                      <div className="spinner-border m-4" role="status">
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </div> : null }
+                    <form onSubmit={event => this.handleFeeStructureUpdate(event)}
+                      className="col-12 col-sm-10 col-md-8" id="structure-form">
+                        {this.state.feeMasterStructures.map((structure, index) => {
+                          return (
+                            <div class="form-group row" key={index}>
+                              <label class="col-4 font-weight-bold">{structure.particular}</label>
+                              <input type="text" name={structure.particularId+'-'+(structure.id ? structure.id : '')}
+                                value={structure.amount} class="col form-control" required min="0"
+                                onChange={event => this.handleInputChange(event, 'feeMasterStructures.'+index+'.amount', 'number')}/>
+                          </div>
+                          );
+                        })}
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
               <div className="tab-pane" id="Fees-add">
-                <div className="card">
+                <form className="card" onSubmit={event => {
+                  this.setState({
+                    showFeeScreen: false,
+                    showReceipt: false,
+                    feeResources: null,
+                    selectedFeeParams: null
+                  });
+                    this.handleStudentSearch(event, 'students', 'student/due-fees');
+                  }}>
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-lg-2 col-md-9 col-sm-6">
+                        <div className="input-group">
+                          <input type="text" className="form-control" placeholder="Name"
+                            value={this.state.studentsSearchParam.name}
+                            onChange={event => this.handleInputChange(event, 'studentsSearchParam.name')} />
+                        </div>
+                      </div>
+                      <div className="col-lg-4 col-md-9 col-sm-6">
+                        <SelectClass classes={this.state.classes} disabledFirst={false}
+                          value={this.state.studentsSearchParam.classId}
+                          onChange={event => this.handleInputChange(event, 'studentsSearchParam.classId')} />
+                      </div>
+                      <div className="col-lg-2 col-md-9 col-sm-6">
+                        <button type="submit" className="btn btn-sm btn-primary btn-block" title>Search</button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div className="table-responsive card">
+                  {!this.state.showFeeScreen && !this.state.showReceipt ?
+                  <table id="student-table" className="table table-hover table-vcenter table-striped mb-0 text-nowrap">
+                    <thead>
+                      <tr>
+                        <th />
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Due Fee</th>
+                        <th>Collect Fee</th>
+                      </tr>
+                    </thead>
+                    <tbody id="student-table-content">
+                      {this.state.students.map(student => {
+                        return (
+                          <tr key={student.id}>
+                            <td class="w-60">
+                                <img class="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                            </td>
+                            <td>{student.fullName}</td>
+                            <td>{student.className}</td>
+                            <td>{student.fee}</td>
+                            <td>
+                                <button type="button" disabled={!student.fee}
+                                  class="btn btn-primary"
+                                    onClick={() => this.openPayFeeScreen(student.studentId, student.classId)}>
+                                    Collect
+                                </button>
+                            </td>
+                        </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table> : null}
+                </div>
+                {this.state.showFeeScreen ?
+                <div className="card" id="pay-fee">
                   <div className="card-header">
-                    <h3 className="card-title">Fees Management </h3>
+                    <h3 className="card-title">Collect Fee</h3>
                     <div className="card-options ">
-                      <a href="#" className="card-options-collapse" data-toggle="card-collapse"><i className="fe fe-chevron-up" /></a>
-                      <a href="#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a>
+                      {/* <a href="#" className="card-options-collapse" data-toggle="card-collapse"><i className="fe fe-chevron-up" /></a>
+                      <a href="#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a> */}
                     </div>
                   </div>
-                  <form className="d-flex card-body">
-                    <div className="col-12 col-md-5">
-                      {/* <div class="form-group row">
-                                            <label class="col-md-3 col-form-label">ID Number <span class="text-danger">*</span></label>
-                                            <div class="col-md-9">
-                                                <input type="text" class="form-control" placeholder="Enter ID Number">
-                                            </div>
-                                        </div> */}
-                      <div className="form-group row">
-                        <label className="col-md-3 col-form-label">Class</label>
-                        <div className="col-md-9">
-                          <select className="form-control input-height" name="department">
-                            <option value>Select...</option>
-                            <option value="Category 1">Class A</option>
-                            <option value="Category 2">Class B</option>
-                            <option value="Category 3">Class 1</option>
-                            <option value="Category 3">Class2</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="form-group row">
-                        <label className="col-md-3 col-form-label">Section</label>
-                        <div className="col-md-9">
-                          <select className="form-control input-height" name="department">
-                            <option value>Select...</option>
-                            <option value="Category 1">Class A(1)</option>
-                            <option value="Category 2">Class A(2)</option>
-                            <option value="Category 3">Class B(1)</option>
-                            <option value="Category 3">Class B(2)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>    
-                    <div className="col-12 col-md-5">   
-                      <div className="form-group row">
-                        <label className="col-md-3 col-form-label">Student Name </label>
-                        <div className="col-md-9">
-                          <input type="text" className="form-control" />
-                        </div>
-                      </div>
-                      <div className="form-group row">
-                        <label className="col-md-3 col-form-label">Gender</label>
-                        <div className="col-md-9">
-                          <select className="form-control input-height" name="department">
-                            <option value>Select...</option>
-                            <option value="Category 1">Male</option>
-                            <option value="Category 2">Female</option>
-                            <option value="Category 3">Other</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="form-group row">
-                        <label className="col-md-3 col-form-label">Father's Name </label>
-                        <div className="col-md-9">
-                          <input type="text" className="form-control" />
-                        </div>
-                      </div>                            
+                  {!this.state.feeResources ?
+                  <div id="pay-fee-loading" className="ml-4" style={{height: '20em'}}>
+                    <div className="spinner-border" role="status">
+                      <span className="sr-only">Loading...</span>
                     </div>
-                    <div className="col-12 col-md-2">
-                      <div className="col-md-9">
-                        <img src="./id.png" className="rounded float-left" alt="..." />               
+                  </div> :
+                  <div id="pay-fee-wrapper">
+                    <div class="d-flex card-body">
+                      <div class="col-12 col-md-5">
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">ID Number</label>
+                                  <div class="col-md-8">
+                                      {this.state.feeResources.student.id}
+                                  </div>
+                              </div>
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">Class</label>
+                                  <div class="col-md-8">
+                                      {this.state.feeResources.student.className}
+                                  </div>
+                              </div>
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">Section</label>
+                                  <div class="col-md-8">
+                                      {this.state.feeResources.student.sectionName}
+                                  </div>
+                              </div>
+                          </div>    
+                          <div class="col-12 col-md-5">   
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">Student Name </label>
+                                  <div class="col-md-8">
+                                      {this.state.feeResources.student.firstName} {this.state.feeResources.student.lastName}
+                                  </div>
+                              </div>
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">Gender</label>
+                                  <div class="col-md-8">
+                                      {this.state.feeResources.student.gender}
+                                  </div>
+                              </div>
+                              <div class="form-group row">
+                                  <label class="col-md-4 font-weight-bold col-form-label">Date Of Admission </label>
+                                  <div class="col-md-8">
+                                      {new Date(this.state.feeResources.student.dateOfAdmission).toDateString()}
+                                  </div>
+                              </div>                            
                       </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-            <div className="tab-pane" id="Fees-add">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">Fees Management </h3>
-                  <div className="card-options ">
-                    <a href="#" className="card-options-collapse" data-toggle="card-collapse"><i className="fe fe-chevron-up" /></a>
-                    <a href="#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a>
+                      <div class="col-12 col-md-2">
+                          <div class="col-md-9">
+                              <img src={this.state.feeResources.student.photo
+                                ? this.state.feeResources.student.photo : baseurl+'uploads/default.jpg'}
+                                class="rounded float-left" alt="Profile" />
+                          </div>
+                      </div>
                   </div>
-                </div>
-                <table className="table table-hover">
-                  <thead>
-                    <tr style={{fontWeight: 'bold'}}>
-                      <th scope="col">Particular</th>
-                      <th scope="col">Current Year Total Amount</th>
-                      <th scope="col">Paid Amount</th>
-                      <th scope="col">Balance(To be Paid)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Admission Fees</th>
-                      <td>500</td>
-                      <td>450</td>
-                      <td>50</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Examination Fees</th>
-                      <td>800</td>
-                      <td>200</td>
-                      <td>600</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Developement Fees</th>
-                      <td>9600</td>
-                      <td>400</td>
-                      <td>9200</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="form-group row">
-                <label className="col-md-3 col-form-label" />
-                <div className="col-md-7">
-                  <button type="submit" className="btn btn-primary">Submit</button>
-                  <button type="submit" className="btn btn-outline-secondary">Cancel</button>
-                </div>
+                  <div class="row m-3">
+                      <table class="table table-bordered col-12">
+                          <thead>
+                              <th>Fee Particulars</th>
+                              <th>Total Amount</th>
+                              <th>Paid Amount</th>
+                              <th>Balance (To be Paid)</th>
+                              <th>Avail</th>
+                          </thead>
+                          <tbody>
+                          {this.state.feeResources.feeStructures.map((structure, index) => {
+                              const amount = structure.amount;
+                              const paid = (this.state.feeResources.paidFees[structure.id] ?
+                                this.state.feeResources.paidFees[structure.id].paidAmount : 0);
+                                let availed = paid!=null;
+                                if(availed) {
+                                  if(structure.particular.toLowerCase().includes('hostel') || structure.particular.toLowerCase().includes('transport')) {
+                                      availed = false;
+                                  }
+                                }
+                              return (
+                                <tr key={index}>
+                                  <td>{structure.particular}</td>
+                                  <td>{amount}</td>
+                                  <td>{paid ? paid : 0}</td>
+                                  <td>{structure.availed ? amount-paid: 0}</td>
+                                  <td><input type="checkbox" class="form-check" disabled={availed}
+                                      value={structure.availed}
+                                      id={(structure.particular.toLowerCase().includes('hostel') ? 'avail-hostel-fee' : '')
+                                        + (structure.particular.toLowerCase().includes('transport') ? ' avail-transport-fee' : '')}
+                                      onChange={() => this.toggleAvailed(index)} />
+                                  </td>
+                                </tr>
+                              );
+                          })}
+                              <tr>
+                                  <td class="font-weight-bold">Total</td>
+                                  <td>{this.getTotalFee()}</td>
+                                  <td>{Object.values(this.state.feeResources.paidFees).reduce((total, fee) => {
+                                    return total + fee.paidAmount;
+                                  }, 0)}</td>
+                                  <td id="total-fee">{this.getTotalFee() - Object.values(this.state.feeResources.paidFees).reduce((total, fee) => {
+                                    return total + fee.paidAmount;
+                                  }, 0)}</td>
+                                  <td></td>
+                              </tr>
+                          </tbody>
+                      </table>
+                      <form class="form-group m-3" id="fee-submitter" onSubmit={event => this.handleSubmitFee(event)}>
+                          <label for="fee-to-pay" class="pl-2">Capture fee:</label>
+                          <div class="d-flex">
+                              <input type="text" class="form-control" onChange={event => this.checkFeeValidity(event)} min="1" required id="fee-to-pay" placeholder="Enter amount to pay" />
+                              <button type="submit" class="btn btn-primary">Submit</button>
+                          </div>
+                      </form>
+                  </div>
+                  </div>}
+                </div> : null}
+                {this.state.showReceipt ?
+                <div className="card" id="receipt">
+                  <div className="card-header">
+                    <h3 className="card-title">#AB0017</h3>
+                    <div className="card-options">
+                      <button type="button" className="btn btn-primary" onClick={this.printReceipt}><i className="si si-printer" /> Print Invoice</button>
+                    </div>
+                  </div>
+                  <div className="card-body" id="invoice">
+                    <div className="row my-8">
+                      <div className="col-6">
+                        <p className="h3">School Full Name</p>
+                        <address>
+                          Street Address<br />
+                          State, City<br />
+                          Region, Postal Code<br />
+                          ltd@example.com
+                        </address>
+                      </div>
+                      <div className="col-6 text-right">
+                        <p className="h3">{this.state.selectedFeeParams.fullName}</p>
+                        {this.state.invoice.date.toDateString()}<br />
+                        {this.state.selectedFeeParams.className}
+                      </div>
+                    </div>
+                    <div className="table-responsive push">
+                      <table className="table table-bordered table-hover text-nowrap">
+                        <tbody><tr>
+                            <th className="text-center width35" />
+                            <th>Payment Method</th>
+                            <th className>Date</th>
+                            <th className="text-right" style={{width: '1%'}}>Amount</th>
+                          </tr>
+                          <tr>
+                            <td className="text-center">1</td>
+                            <td>
+                              Cash Deposit
+                            </td>
+                            <td className>{this.state.invoice.date.toDateString()}</td>
+                            <td className="text-right">Rs {this.state.invoice.amount}</td>
+                          </tr>
+                          <tr className="bg-green text-light">
+                            <td colSpan={3} className="font700 text-right">Total Paid</td>
+                            <td className="font700 text-right">Rs {this.state.invoice.amount}</td>
+                          </tr>
+                        </tbody></table>
+                    </div>
+                  </div>
+                </div> : null}
               </div>
             </div>
           </div>
@@ -617,6 +934,7 @@ import { Link } from 'react-router-dom';
           </footer>
         </div>
       </div>
-    );
+      );
+    }
   };
 export default Payments;
