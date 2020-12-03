@@ -671,11 +671,12 @@ class Students extends AbstractComponent {
                         <th></th>
                       </tr>
                     </thead>
+                    {this.state.isStudentsLoading ?
                     <div class="d-flex justify-content-center">
                       <div class="spinner-border text-info my-5" role="status">
                         <span class="sr-only">Loading...</span>
                       </div>
-                    </div>
+                    </div> : null}
                     <tbody>
                         {this.state.students.map(student => {
                           return (
@@ -689,10 +690,10 @@ class Students extends AbstractComponent {
                                 <td>{new Date(student.dateOfBirth).toDateString()}</td>
                                 <td>{student.gender}</td>
                                 <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
-								<td>{student.emergencyContact.mobileNo}</td>
+								                <td>{student.emergencyContact.mobileNo}</td>
                                 <td>
-                                    <button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button>
-                                    <button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button>
+                                    <Link to="view-student"><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
+                                    <Link to="edit-student"><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
                                     <button type="button" className="btn btn-icon btn-sm js-sweetalert" title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"></i></button>
                                 </td>
                             </tr>
@@ -790,15 +791,16 @@ class Students extends AbstractComponent {
                       </div> :
                       <div className="wrapper" id="id-card-wrapper">
                         <div className="identityCard">
-                          <header className="identityCard__header">
-                            School Identity Card
+                          <header className="identityCard__header d-flex flex-column text-center">
+                            <div>Central Academy School</div>
+                            <div>Identity Card</div>
                           </header>
                           <div className="identityCard__profile">
                             {/* <div class="identityCard__identity">
                                                 <strong>Carte nationale d'identité n° :</strong> {id}
                                             </div> */}
                             <div className="identityCard__visual">
-                              <img src={this.state.selectedStudentForIdCard.photo || baseurl + 'uploads/default.jpg'}
+                              <img src={baseurl+(this.state.selectedStudentForIdCard.photo ?this.state.selectedStudentForIdCard.photo:'uploads/default.jpg')}
                                 alt="" />
                             </div>
                             <ul className="identityCard__list list-unstyled">
@@ -806,12 +808,12 @@ class Students extends AbstractComponent {
                               <li><strong>Class :</strong> {this.state.selectedStudentForIdCard.className + (this.state.selectedStudentForIdCard.sectionName ? ' (' + this.state.selectedStudentForIdCard.sectionName + ')' : '')}</li>
                               <li><strong>Gender :</strong> {this.state.selectedStudentForIdCard.gender}</li>
                               <li><strong>Date of birth :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfBirth).toDateString()}</li>
-                              <li><strong>Date of Admission :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfAdmission).toDateString()}</li>
+                              <li><strong>Emergency Contact Number :</strong> {this.state.selectedStudentForIdCard.emergencyContact.mobileNo}</li>
                               <li><strong>Blood Group :</strong> {this.state.selectedStudentForIdCard.bloodGroup}</li>
                             </ul>
                           </div>
                           <footer className="identityCard__footer">
-                            <div className="filled"><span>Emergency Number: +91 9876543210</span></div>
+                            <div className="filled"><span>123 some street, city - +91 123 456 7890</span></div>
                             {/* <div class="filled"><span>{School Address}</span></div> */}
                           </footer>
                         </div>
