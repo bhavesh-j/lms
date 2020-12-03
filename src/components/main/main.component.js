@@ -5,6 +5,7 @@ import Home from '../home/home.component';
 import Students from '../students/students.component';
 import NotFound from '../notfound/notfound.component';
 import Payments from '../payments/payments.component';
+import EditStudent from '../students/editStudent.component';
 
 class Main extends Component {
     render() {
@@ -14,6 +15,8 @@ class Main extends Component {
                 <Route exact path="/" component={Home} />
                 <Route exact path="/students" component={Students} />
                 <Route exact path="/payments" component={Payments}/>
+                <Route exact path="/edit-student" component={() => <EditStudent readOnly={false}/>}/>
+                <Route exact path="/view-student" component={() => <EditStudent readOnly={true}/>}/>
                 <Route path="/not-found" component={NotFound} />
                 <Redirect to="not-found" />
             </>
