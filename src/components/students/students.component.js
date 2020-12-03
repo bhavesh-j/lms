@@ -1,10 +1,12 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
 import SelectClass from '../selectclass/selectclass.component';
+import { Link } from 'react-router-dom';
+
 
 function StateDropdown(props) {
   return (
-    <select className="form-control input-height" name={props.name}
+    <select readOnly ={props.readOnly} className="form-control input-height" name={props.name}
       value={props.value} onChange={props.onChange} required>
       <option value>Select State</option>
       <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -48,7 +50,7 @@ function StateDropdown(props) {
 
 function AcademicYear(props) {
   return (
-    <select className="form-control input-height" name={props.name} required>
+    <select readOnly ={props.readOnly} className="form-control input-height" name={props.name} required>
       <option value>Select Year</option>
       <option value="2020">2020</option>
       <option value="2019">2019</option>
@@ -102,10 +104,10 @@ class Students extends AbstractComponent {
         nationality: '',
         gender: '',
         permanentAddress: {
-            street: '',
-            city: '',
-            state: '',
-            pincode: ''
+          street: '',
+          city: '',
+          state: '',
+          pincode: ''
         },
         caste: 'General',
         motherTongue: '',
@@ -191,167 +193,167 @@ class Students extends AbstractComponent {
 
     document.body.appendChild(script);
 
-    this.setState({isStudentsLoading: true});
+    this.setState({ isStudentsLoading: true });
     this.fetchClasses()
-    .then(classes => {
-      this.callServerMethod('student')
-      .then(students => {
-        this.setState({
-          isStudentsLoading: false,
-          students: students
-        });
-      });
-      this.setState({classes: classes});
-    }).catch(err => console.log(err));
+      .then(classes => {
+        this.callServerMethod('student')
+          .then(students => {
+            this.setState({
+              isStudentsLoading: false,
+              students: students
+            });
+          });
+        this.setState({ classes: classes });
+      }).catch(err => console.log(err));
   }
 
   handleAdmissionFormSubmit(event) {
     event.preventDefault();
     this.toggleLoading(true);
-    this.setState({admissionFormErrors: []});
+    this.setState({ admissionFormErrors: [] });
     const permanentAddress = this.state.studentFormResources.permanentAddress.split(',');
     const admissionForm = this.copyObject(this.state.studentForm);
-    admissionForm.permanentAddress.street = (permanentAddress.length>1 ? 
-      permanentAddress.slice(0, permanentAddress.length-1).join(',').trim()
+    admissionForm.permanentAddress.street = (permanentAddress.length > 1 ?
+      permanentAddress.slice(0, permanentAddress.length - 1).join(',').trim()
       : permanentAddress.join(',').trim());
-    admissionForm.permanentAddress.city = (permanentAddress.length>1 ? 
-      permanentAddress[permanentAddress.length-1].trim()
+    admissionForm.permanentAddress.city = (permanentAddress.length > 1 ?
+      permanentAddress[permanentAddress.length - 1].trim()
       : null);
-    
-      if(this.state.studentFormResources.permanentAndPresentAddressSame) {
-        admissionForm.presentAddress = admissionForm.permanentAddress;
-      } else {
-        const presentAddress = this.state.studentFormResources.presentAddress.split(',');
-        admissionForm.presentAddress.street = (presentAddress.length>1 ? 
-          presentAddress.slice(0, presentAddress.length-1).join(',').trim()
-          : presentAddress.join(',').trim());
-        admissionForm.presentAddress.city = (presentAddress.length>1 ? 
-          presentAddress[presentAddress.length-1].trim()
-          : null);
+
+    if (this.state.studentFormResources.permanentAndPresentAddressSame) {
+      admissionForm.presentAddress = admissionForm.permanentAddress;
+    } else {
+      const presentAddress = this.state.studentFormResources.presentAddress.split(',');
+      admissionForm.presentAddress.street = (presentAddress.length > 1 ?
+        presentAddress.slice(0, presentAddress.length - 1).join(',').trim()
+        : presentAddress.join(',').trim());
+      admissionForm.presentAddress.city = (presentAddress.length > 1 ?
+        presentAddress[presentAddress.length - 1].trim()
+        : null);
+    }
+    admissionForm.classSection = Number(admissionForm.classSection);
+    const photos = new FormData();
+    const studentPhoto = document.getElementById('student-photo');
+    if (studentPhoto.files && studentPhoto.files[0]) {
+      photos.append('student', studentPhoto.files[0]);
+    }
+    if (this.state.studentFormResources.parentOrGuardian === 'Parents') {
+      const fatherPhoto = document.getElementById('father-photo');
+      if (fatherPhoto.files && fatherPhoto.files[0]) {
+        photos.append('Father', fatherPhoto.files[0]);
       }
-      admissionForm.classSection = Number(admissionForm.classSection);
-      const photos = new FormData();
-      const studentPhoto = document.getElementById('student-photo');
-      if(studentPhoto.files && studentPhoto.files[0]) {
-          photos.append('student', studentPhoto.files[0]);
+      admissionForm.parents.push(this.state.studentFormResources.father);
+      const motherPhoto = document.getElementById('mother-photo');
+      if (motherPhoto.files && motherPhoto.files[0]) {
+        photos.append('Mother', motherPhoto.files[0]);
       }
-      if(this.state.studentFormResources.parentOrGuardian === 'Parents') {
-        const fatherPhoto = document.getElementById('father-photo');
-        if(fatherPhoto.files && fatherPhoto.files[0]) {
-          photos.append('Father', fatherPhoto.files[0]);
-        }
-        admissionForm.parents.push(this.state.studentFormResources.father);
-        const motherPhoto = document.getElementById('mother-photo');
-        if(motherPhoto.files && motherPhoto.files[0]) {
-          photos.append('Mother', motherPhoto.files[0]);
-        }
-        admissionForm.parents.push(this.state.studentFormResources.mother);
-      } else {
-        const guardianPhoto = document.getElementById('guardian-photo');
-        if(guardianPhoto.files && guardianPhoto.files[0]) {
-          photos.append('Guardian', guardianPhoto.files[0]);
-        }
-        admissionForm.parents.push(this.state.studentFormResources.guardian);
+      admissionForm.parents.push(this.state.studentFormResources.mother);
+    } else {
+      const guardianPhoto = document.getElementById('guardian-photo');
+      if (guardianPhoto.files && guardianPhoto.files[0]) {
+        photos.append('Guardian', guardianPhoto.files[0]);
       }
-      admissionForm.dateOfBirth = new Date(admissionForm.dateOfBirth);
-      for(let i in admissionForm.parents) {
-        const fullname = admissionForm.parents[i].name.split(' ');
-        admissionForm.parents[i].firstName = fullname[0];
-        admissionForm.parents[i].lastName = fullname[1];
-      }
-      this.callServerMethod('student/validate-admission-form-resources', 'POST', {
-        'Content-Type': 'application/json'
-      }, JSON.stringify(admissionForm)).then(res => {
-        this.toggleLoading(false);
-        if(typeof res === 'boolean') {
-          if(res) {
-            this.toggleLoading(true);
-            this.callServerMethod('fileupload', 'POST', null, photos).then(urls => {
-              admissionForm.photo = urls.student;
-              for (let index = 0; index < admissionForm.parents.length; index++) {
-                admissionForm.parents[index].photo = urls[admissionForm.parents[index].relationToStudent];
-              }
-              return this.callServerMethod('student/admission', 'POST', {
-                'Content-Type': 'application/json'
-              }, JSON.stringify(admissionForm));
-            }).then(res => {
-              this.toggleLoading(false);
-              if(res.success) {
-                alert('Form Submittes Form is successfully submitted success');
-                this.showFeeForClass(admissionForm.admissionForClass, res.payload);
-                const students = this.state.students;
-                const admissionForClass = document.getElementById('admission-for-class');
-                students.push({
-                    id: res.payload,
-                    firstName: admissionForm.firstName,
-                    lastName: admissionForm.lastName,
-                    className: admissionForClass.options[admissionForClass.selectedIndex].text,
-                    dateOfBirth: admissionForm.dateOfBirth,
-                    gender: admissionForm.gender,
-                    dateOfAdmission: new Date().toUTCString(),
-                    photo: admissionForm.photo
-                });
-                this.setState({
-                  students: students,
-                  studentFormResources: {...this.state.studentFormResources, studentId: res.payload}
-                });
-                this.scrollTop();
+      admissionForm.parents.push(this.state.studentFormResources.guardian);
+    }
+    admissionForm.dateOfBirth = new Date(admissionForm.dateOfBirth);
+    for (let i in admissionForm.parents) {
+      const fullname = admissionForm.parents[i].name.split(' ');
+      admissionForm.parents[i].firstName = fullname[0];
+      admissionForm.parents[i].lastName = fullname[1];
+    }
+    this.callServerMethod('student/validate-admission-form-resources', 'POST', {
+      'Content-Type': 'application/json'
+    }, JSON.stringify(admissionForm)).then(res => {
+      this.toggleLoading(false);
+      if (typeof res === 'boolean') {
+        if (res) {
+          this.toggleLoading(true);
+          this.callServerMethod('fileupload', 'POST', null, photos).then(urls => {
+            admissionForm.photo = urls.student;
+            for (let index = 0; index < admissionForm.parents.length; index++) {
+              admissionForm.parents[index].photo = urls[admissionForm.parents[index].relationToStudent];
+            }
+            return this.callServerMethod('student/admission', 'POST', {
+              'Content-Type': 'application/json'
+            }, JSON.stringify(admissionForm));
+          }).then(res => {
+            this.toggleLoading(false);
+            if (res.success) {
+              alert('Form Submittes Form is successfully submitted success');
+              this.showFeeForClass(admissionForm.admissionForClass, res.payload);
+              const students = this.state.students;
+              const admissionForClass = document.getElementById('admission-for-class');
+              students.push({
+                id: res.payload,
+                firstName: admissionForm.firstName,
+                lastName: admissionForm.lastName,
+                className: admissionForClass.options[admissionForClass.selectedIndex].text,
+                dateOfBirth: admissionForm.dateOfBirth,
+                gender: admissionForm.gender,
+                dateOfAdmission: new Date().toUTCString(),
+                photo: admissionForm.photo
+              });
+              this.setState({
+                students: students,
+                studentFormResources: { ...this.state.studentFormResources, studentId: res.payload }
+              });
+              this.scrollTop();
+            } else {
+              let listErrors = [];
+              if (res.message) {
+                listErrors.push(res.message);
               } else {
-                let listErrors = [];
-                if(res.message) {
-                    listErrors.push(res.message);
-                } else {
-                    for (let key in res) {
-                        res[key]._errors.forEach(msg => {
-                            listErrors.push(msg['<ErrorMessage>k__BackingField']);
-                        });
-                    }
-                }
-                this.setState({admissionFormErrors: listErrors});
-                this.scrollTop();
-              }
-            }).catch(err => console.log(err));
-          } else {
-            this.setState({
-              admissionFormErrors: [`Aadhar Number ${admissionForm.aadharNo} already exists.`]
-            });
-            this.scrollTop();
-          }
-        } else {
-          let listErrors = [];
-          if(res.message) {
-              listErrors.push(res.message);
-          } else {
-              for (let key in res) {
+                for (let key in res) {
                   res[key]._errors.forEach(msg => {
-                      listErrors.push(msg['<ErrorMessage>k__BackingField']);
+                    listErrors.push(msg['<ErrorMessage>k__BackingField']);
                   });
+                }
               }
-          }
-          this.setState({admissionFormErrors: listErrors});
+              this.setState({ admissionFormErrors: listErrors });
+              this.scrollTop();
+            }
+          }).catch(err => console.log(err));
+        } else {
+          this.setState({
+            admissionFormErrors: [`Aadhar Number ${admissionForm.aadharNo} already exists.`]
+          });
           this.scrollTop();
         }
-      }).catch(err => console.log(err));
+      } else {
+        let listErrors = [];
+        if (res.message) {
+          listErrors.push(res.message);
+        } else {
+          for (let key in res) {
+            res[key]._errors.forEach(msg => {
+              listErrors.push(msg['<ErrorMessage>k__BackingField']);
+            });
+          }
+        }
+        this.setState({ admissionFormErrors: listErrors });
+        this.scrollTop();
+      }
+    }).catch(err => console.log(err));
   }
 
   showFeeForClass(classId, studentId) {
     this.toggleLoading(true);
-    this.callServerMethod('feestructure/'+classId)
-    .then(feeList => {
-      feeList.forEach((feeItem,index) => {
-        const particular = feeItem.particular.toLowerCase();
-        let toInclude = true;
-        if(particular.includes('hostel') || particular.includes('transport')) {
-          toInclude = false;
-        }
-        feeList[index].include = toInclude;
-      });
-      this.toggleLoading(false);
-      this.setState({
-        submitAdmissionFee: true,
-        feeList: feeList,
-      });
-    }).catch(err => console.log(err));
+    this.callServerMethod('feestructure/' + classId)
+      .then(feeList => {
+        feeList.forEach((feeItem, index) => {
+          const particular = feeItem.particular.toLowerCase();
+          let toInclude = true;
+          if (particular.includes('hostel') || particular.includes('transport')) {
+            toInclude = false;
+          }
+          feeList[index].include = toInclude;
+        });
+        this.toggleLoading(false);
+        this.setState({
+          submitAdmissionFee: true,
+          feeList: feeList,
+        });
+      }).catch(err => console.log(err));
   }
 
   resetAdmissionForm() {
@@ -361,43 +363,43 @@ class Students extends AbstractComponent {
     });
     const tagId = (id) => document.getElementById(id);
     ['student', 'father', 'mother', 'guardian'].forEach(entity => {
-      if(tagId(entity+'-photo')) tagId(entity+'-photo').value='';
+      if (tagId(entity + '-photo')) tagId(entity + '-photo').value = '';
     });
   }
 
   getTotalFee() {
     return this.state.feeList.reduce((totalFee, feeItem) => {
-      if(feeItem.include) totalFee += feeItem.amount;
+      if (feeItem.include) totalFee += feeItem.amount;
       return totalFee;
     }, 0);
   }
 
   checkFeeValidity(event) {
     const value = event.target.value;
-    if(isNaN(Number(value))) {
+    if (isNaN(Number(value))) {
       return;
     }
-    this.setState({feeToPay: value});
+    this.setState({ feeToPay: value });
     const totalFee = this.getTotalFee();
     const feeToPay = Number(value);
-    event.target.setCustomValidity((feeToPay > totalFee) ? "Fee amount is greate than "+totalFee+"!": "");
+    event.target.setCustomValidity((feeToPay > totalFee) ? "Fee amount is greate than " + totalFee + "!" : "");
   }
 
   feeToggle(event, hint) {
     const feeList = this.state.feeList;
     feeList.forEach((feeItem, index) => {
       const particular = feeItem.particular.toLowerCase();
-      if(particular.includes(hint)) {
+      if (particular.includes(hint)) {
         feeList[index].include = !feeList[index].include;
         return false;
       }
     });
-    this.setState({feeList: feeList});
+    this.setState({ feeList: feeList });
   }
 
   toggleFeeCard() {
     this.resetAdmissionForm();
-    this.setState({submitAdmissionFee: false});
+    this.setState({ submitAdmissionFee: false });
   }
 
   handleSubmitFee(event) {
@@ -422,19 +424,19 @@ class Students extends AbstractComponent {
       this.toggleLoading(false);
       console.log('Pay Successful!', res.message, 'success');
       this.toggleFeeCard();
-      this.setState({feeToPay: 0});
+      this.setState({ feeToPay: 0 });
     }).catch(err => console.log(err));
   }
 
   generateIdCard(studentIndex) {
     const studentId = this.state.studentListForIdCard[studentIndex].id;
-    this.setState({showIdCard: true});
-    this.callServerMethod('student/'+studentId)
-    .then(student => {
-      this.setState({
-        selectedStudentForIdCard: student
-      });
-    }).catch(err => console.log(err));
+    this.setState({ showIdCard: true });
+    this.callServerMethod('student/' + studentId)
+      .then(student => {
+        this.setState({
+          selectedStudentForIdCard: student
+        });
+      }).catch(err => console.log(err));
   }
 
   printIdCard() {
@@ -442,7 +444,7 @@ class Students extends AbstractComponent {
   }
 
   render() {
-      return(
+    return (
       <div className="page">
         {/* Start Page header */}
         <div className="section-body" id="page_top">
@@ -645,8 +647,8 @@ class Students extends AbstractComponent {
                       </div>
                       <div className="col-lg-4 col-md-9 col-sm-6">
                         <SelectClass classes={this.state.classes} disabledFirst={false}
-                         value={this.state.studentsSearchParam.classId}
-                         onChange={event => this.handleInputChange(event, 'studentsSearchParam.classId')} />
+                          value={this.state.studentsSearchParam.classId}
+                          onChange={event => this.handleInputChange(event, 'studentsSearchParam.classId')} />
                       </div>
                       <div className="col-lg-2 col-md-9 col-sm-6">
                         <button type="submit" className="btn btn-sm btn-primary btn-block" title>Search</button>
@@ -670,46 +672,50 @@ class Students extends AbstractComponent {
                       </tr>
                     </thead>
                     <tbody>
-                        {this.state.students.map(student => {
-                          return (
-                            <tr key={student.id}>
-                                <td className="w-60">
-                                    <img className="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
-                                </td>
-                                <td>{student.id}</td>
-                                <td>{student.firstName} {student.lastName}</td>
-                                <td>{student.className} {student.sectionName?('('+student.sectionName+')'):''}</td>
-                                <td>{new Date(student.dateOfBirth).toDateString()}</td>
-                                <td>{student.gender}</td>
-                                <td>-- To be added --</td>
-                                <td>-- To be added --</td>
-                                <td>
-                                    <button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button>
-                                    <button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button>
-                                    <button type="button" className="btn btn-icon btn-sm js-sweetalert" title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"></i></button>
-                                </td>
-                            </tr>
-                          );
-                        })}
+                      {this.state.students.map(student => {
+                        return (
+                          <tr key={student.id}>
+                            <td className="w-60">
+                              <img className="avatar" src={student.photo ? student.photo : baseurl + 'uploads/default.jpg'} alt="" />
+                            </td>
+                            <td>{student.id}</td>
+                            <td>{student.firstName} {student.lastName}</td>
+                            <td>{student.className} {student.sectionName ? ('(' + student.sectionName + ')') : ''}</td>
+                            <td>{new Date(student.dateOfBirth).toDateString()}</td>
+                            <td>{student.gender}</td>
+                            <td>-- To be added --</td>
+                            <td>-- To be added --</td>
+                            <td>
+                              <Link to="view-student">
+                                <button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button>
+                              </Link>
+                              <Link to="edit-student">
+                                <button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button>
+                              </Link>
+                              <button type="button" className="btn btn-icon btn-sm js-sweetalert" title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"></i></button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
               </div>
               <div className="tab-pane" id="generate-id-card">
                 <form className="card" onSubmit={event => {
-                    this.setState({
-                      showIdCard: false,
-                      selectedStudentForIdCard: null
-                    });
-                    this.handleStudentSearch(event, 'studentListForIdCard');
-                  }}>
+                  this.setState({
+                    showIdCard: false,
+                    selectedStudentForIdCard: null
+                  });
+                  this.handleStudentSearch(event, 'studentListForIdCard');
+                }}>
                   <div className="card-body">
                     <div className="row">
                       <div className="col-lg-2 col-md-9 col-sm-6">
                         <div className="input-group">
                           <input type="text" className="form-control" placeholder="Name"
-                         value={this.state.studentListForIdCardSearchParam.name}
-                         onChange={event => this.handleInputChange(event, 'studentListForIdCardSearchParam.name')} />
+                            value={this.state.studentListForIdCardSearchParam.name}
+                            onChange={event => this.handleInputChange(event, 'studentListForIdCardSearchParam.name')} />
                         </div>
                       </div>
                       <div className="col-lg-2 col-md-9 col-sm-6">
@@ -719,8 +725,8 @@ class Students extends AbstractComponent {
                       </div>
                       <div className="col-lg-4 col-md-9 col-sm-6">
                         <SelectClass classes={this.state.classes} disabledFirst={false}
-                         value={this.state.studentListForIdCardSearchParam.classId}
-                         onChange={event => this.handleInputChange(event, 'studentListForIdCardSearchParam.classId')} />
+                          value={this.state.studentListForIdCardSearchParam.classId}
+                          onChange={event => this.handleInputChange(event, 'studentListForIdCardSearchParam.classId')} />
                       </div>
                       <div className="col-lg-2 col-md-9 col-sm-6">
                         <button type="submit" className="btn btn-sm btn-primary btn-block" title>Search</button>
@@ -730,86 +736,86 @@ class Students extends AbstractComponent {
                 </form>
                 <div className="table-responsive card">
                   {!this.state.showIdCard ?
-                  <table id="student-table-2" className="table table-hover table-vcenter table-striped mb-0 text-nowrap">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Class</th>
-                        <th>Birth Date</th>
-                        <th>Gender</th>
-                        <th>Admission Date</th>
-                        <th>Generate Id Card</th>
-                      </tr>
-                    </thead>
-                    <tbody id="student-table-content-2">
-                    {this.state.studentListForIdCard.map((student, index) => {
-                        return (
-                          <tr key={student.id}>
+                    <table id="student-table-2" className="table table-hover table-vcenter table-striped mb-0 text-nowrap">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Class</th>
+                          <th>Birth Date</th>
+                          <th>Gender</th>
+                          <th>Admission Date</th>
+                          <th>Generate Id Card</th>
+                        </tr>
+                      </thead>
+                      <tbody id="student-table-content-2">
+                        {this.state.studentListForIdCard.map((student, index) => {
+                          return (
+                            <tr key={student.id}>
                               <td className="w-60">
-                                  <img className="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                                <img className="avatar" src={student.photo ? student.photo : baseurl + 'uploads/default.jpg'} alt="" />
                               </td>
                               <td>{student.id}</td>
                               <td>{student.firstName} {student.lastName}</td>
-                              <td>{student.className} {student.sectionName?('('+student.sectionName+')'):''}</td>
+                              <td>{student.className} {student.sectionName ? ('(' + student.sectionName + ')') : ''}</td>
                               <td>{new Date(student.dateOfBirth).toDateString()}</td>
                               <td>{student.gender}</td>
                               <td>{new Date(student.dateOfAdmission).toDateString()}</td>
                               <td class="d-flex">
                                 <button class="btn btn-primary mx-auto"
                                   onClick={() => this.generateIdCard(index)}>
-                                    Generate
+                                  Generate
                                 </button>
                               </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table> : null}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table> : null}
                 </div>
                 {this.state.showIdCard ?
-                <div className="container" id="id-card">
-                  <div className="d-flex justify-content-between">
-                    <div className="h4">Identity Card</div>
-                    <button className="ml-auto btn btn-primary" onClick={this.printIdCard}
-                      disabled={!this.state.selectedStudentForIdCard}>Print</button>
-                  </div>
-                  {!this.state.selectedStudentForIdCard ?
-                  <div id="id-card-loading" style={{ height: '20em' }}>
-                    <div className="spinner-border" role="status">
-                      <span className="sr-only">Loading...</span>
+                  <div className="container" id="id-card">
+                    <div className="d-flex justify-content-between">
+                      <div className="h4">Identity Card</div>
+                      <button className="ml-auto btn btn-primary" onClick={this.printIdCard}
+                        disabled={!this.state.selectedStudentForIdCard}>Print</button>
                     </div>
-                  </div> :
-                  <div className="wrapper" id="id-card-wrapper">
-                    <div className="identityCard">
-                      <header className="identityCard__header">
-                        School Identity Card
+                    {!this.state.selectedStudentForIdCard ?
+                      <div id="id-card-loading" style={{ height: '20em' }}>
+                        <div className="spinner-border" role="status">
+                          <span className="sr-only">Loading...</span>
+                        </div>
+                      </div> :
+                      <div className="wrapper" id="id-card-wrapper">
+                        <div className="identityCard">
+                          <header className="identityCard__header">
+                            School Identity Card
                           </header>
-                      <div className="identityCard__profile">
-                        {/* <div class="identityCard__identity">
+                          <div className="identityCard__profile">
+                            {/* <div class="identityCard__identity">
                                                 <strong>Carte nationale d'identité n° :</strong> {id}
                                             </div> */}
-                        <div className="identityCard__visual">
-                          <img src={this.state.selectedStudentForIdCard.photo || baseurl+'uploads/default.jpg'}
-                            alt="" />
+                            <div className="identityCard__visual">
+                              <img src={this.state.selectedStudentForIdCard.photo || baseurl + 'uploads/default.jpg'}
+                                alt="" />
+                            </div>
+                            <ul className="identityCard__list list-unstyled">
+                              <li><strong>Name :</strong> {this.state.selectedStudentForIdCard.firstName} {this.state.selectedStudentForIdCard.lastName}</li>
+                              <li><strong>Class :</strong> {this.state.selectedStudentForIdCard.className + (this.state.selectedStudentForIdCard.sectionName ? ' (' + this.state.selectedStudentForIdCard.sectionName + ')' : '')}</li>
+                              <li><strong>Gender :</strong> {this.state.selectedStudentForIdCard.gender}</li>
+                              <li><strong>Date of birth :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfBirth).toDateString()}</li>
+                              <li><strong>Date of Admission :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfAdmission).toDateString()}</li>
+                              <li><strong>Blood Group :</strong> {this.state.selectedStudentForIdCard.bloodGroup}</li>
+                            </ul>
+                          </div>
+                          <footer className="identityCard__footer">
+                            <div className="filled"><span>Emergency Number: +91 9876543210</span></div>
+                            {/* <div class="filled"><span>{School Address}</span></div> */}
+                          </footer>
                         </div>
-                        <ul className="identityCard__list list-unstyled">
-                          <li><strong>Name :</strong> {this.state.selectedStudentForIdCard.firstName} {this.state.selectedStudentForIdCard.lastName}</li>
-                          <li><strong>Class :</strong> {this.state.selectedStudentForIdCard.className+(this.state.selectedStudentForIdCard.sectionName ? ' ('+this.state.selectedStudentForIdCard.sectionName+')':'')}</li>
-                          <li><strong>Gender :</strong> {this.state.selectedStudentForIdCard.gender}</li>
-                          <li><strong>Date of birth :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfBirth).toDateString()}</li>
-                          <li><strong>Date of Admission :</strong> {new Date(this.state.selectedStudentForIdCard.dateOfAdmission).toDateString()}</li>
-                          <li><strong>Blood Group :</strong> {this.state.selectedStudentForIdCard.bloodGroup}</li>
-                        </ul>
-                      </div>
-                      <footer className="identityCard__footer">
-                        <div className="filled"><span>Emergency Number: +91 9876543210</span></div>
-                        {/* <div class="filled"><span>{School Address}</span></div> */}
-                      </footer>
-                    </div>
-                  </div>}
-                </div> : null}
+                      </div>}
+                  </div> : null}
               </div>
               <div className="tab-pane" id="Student-profile">
                 <div className="row">
@@ -1044,7 +1050,7 @@ class Students extends AbstractComponent {
               <div className="tab-pane" id="Student-add">
                 <div className="row clearfix">
                   <div className="col col-md-12 col-sm-12">
-                    <div className={"card "+(this.state.submitAdmissionFee ? "" : "d-none")} id="fee-card-admission">
+                    <div className={"card " + (this.state.submitAdmissionFee ? "" : "d-none")} id="fee-card-admission">
                       <div className="card-header">
                         <h3 className="card-title">Fee Info</h3>
                         <div className="card-options ">
@@ -1078,7 +1084,7 @@ class Students extends AbstractComponent {
                                   <input type="text" className="form-control" onChange={this.checkFeeValidity}
                                     value={this.state.feeToPay}
                                     min={1} required id="fee-to-pay" placeholder="Enter amount to pay"
-                                    />
+                                  />
                                   <button type="submit" className="btn btn-primary">Submit</button>
                                 </div>
                               </form>
@@ -1097,18 +1103,18 @@ class Students extends AbstractComponent {
                               {this.state.feeList.map((feeItem, index) => {
                                 return (
                                   <tr key={index} data-amount={feeItem.amount} class={feeItem.include ? '' : 'd-none'}>
-                                      <td>{feeItem.particular}</td>
-                                      <td>{feeItem.amount}</td>
-                                      <td>0</td>
-                                      <td>{feeItem.amount}</td>
+                                    <td>{feeItem.particular}</td>
+                                    <td>{feeItem.amount}</td>
+                                    <td>0</td>
+                                    <td>{feeItem.amount}</td>
                                   </tr>
                                 );
                               })}
                               <tr>
-                                  <td class="font-weight-bold">Total:</td>
-                                  <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
-                                  <td class="font-weight-bold">0</td>
-                                  <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
+                                <td class="font-weight-bold">Total:</td>
+                                <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
+                                <td class="font-weight-bold">0</td>
+                                <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -1126,12 +1132,12 @@ class Students extends AbstractComponent {
                         </div>
                       </div>
                       <div className="container">
-                        <div className={"alert alert-danger "+(this.state.admissionFormErrors.length ? '' : 'd-none')}
+                        <div className={"alert alert-danger " + (this.state.admissionFormErrors.length ? '' : 'd-none')}
                           id="student-form-alert">
                           <ul className="mb-0">
                             {this.state.admissionFormErrors.map((error, index) => {
                               return (
-                              <li key={index}>{error}</li>
+                                <li key={index}>{error}</li>
                               );
                             })}
                           </ul>
@@ -1332,34 +1338,34 @@ class Students extends AbstractComponent {
                               <label className="form-check-label" htmlFor="same-address">Present Address Same as Permanent Address</label>
                             </div>
                             {!this.state.studentFormResources.permanentAndPresentAddressSame ?
-                            <>
-                              <div className="form-group row present-address">
-                                <label className="col-md-3 col-form-label">Present Address&nbsp;<span className="text-danger">*</span></label>
-                                <div className="col-md-9">
-                                  <textarea rows={3} className="form-control"
-                                    value={this.state.studentFormResources.presentAddress}
-                                    onChange={(event) => this.handleInputChange(event, 'studentFormResources.presentAddress')}
-                                    name="present-address" required placeholder="Street, City" defaultValue={""} />
+                              <>
+                                <div className="form-group row present-address">
+                                  <label className="col-md-3 col-form-label">Present Address&nbsp;<span className="text-danger">*</span></label>
+                                  <div className="col-md-9">
+                                    <textarea rows={3} className="form-control"
+                                      value={this.state.studentFormResources.presentAddress}
+                                      onChange={(event) => this.handleInputChange(event, 'studentFormResources.presentAddress')}
+                                      name="present-address" required placeholder="Street, City" defaultValue={""} />
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="form-group row present-address">
-                                <label className="col-md-3 col-form-label">State&nbsp;<span className="text-danger">*</span></label>
-                                <div className="col-md-9">
-                                  <StateDropdown name="present-state" value={this.state.studentForm.presentAddress.state}
-                                    onChange={(event) => this.handleInputChange(event, 'studentForm.presentAddress.state')}>
-                                  </StateDropdown>
+                                <div className="form-group row present-address">
+                                  <label className="col-md-3 col-form-label">State&nbsp;<span className="text-danger">*</span></label>
+                                  <div className="col-md-9">
+                                    <StateDropdown name="present-state" value={this.state.studentForm.presentAddress.state}
+                                      onChange={(event) => this.handleInputChange(event, 'studentForm.presentAddress.state')}>
+                                    </StateDropdown>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="form-group row present-address">
-                                <label className="col-md-3 col-form-label">Pincode&nbsp;<span className="text-danger">*</span></label>
-                                <div className="col-md-9">
-                                  <input type="text" className="form-control" name="present-pincode"
-                                    value={this.state.studentForm.presentAddress.pincode}
-                                    onChange={(event) => this.handleInputChange(event, 'studentForm.presentAddress.pincode')}
-                                    required placeholder="Enter Pincode" />
+                                <div className="form-group row present-address">
+                                  <label className="col-md-3 col-form-label">Pincode&nbsp;<span className="text-danger">*</span></label>
+                                  <div className="col-md-9">
+                                    <input type="text" className="form-control" name="present-pincode"
+                                      value={this.state.studentForm.presentAddress.pincode}
+                                      onChange={(event) => this.handleInputChange(event, 'studentForm.presentAddress.pincode')}
+                                      required placeholder="Enter Pincode" />
+                                  </div>
                                 </div>
-                              </div>
-                            </> : null
+                              </> : null
                             }
                           </div>
                         </div>
@@ -1381,173 +1387,173 @@ class Students extends AbstractComponent {
                                 </div>
                               </div>
                               {this.state.studentFormResources.parentOrGuardian === 'Parents' ?
-                              <>
-                              <div className="row parent-info">
-                                <div className="form-group row col-6">
-                                  <label className="col-md-3 col-form-label">Father's Photo</label>
-                                  <div className="col-md-5 height-100">
-                                    <input type="file" name="father-photo" id="father-photo" className />
-                                  </div>
-                                </div>
-                                <div className="col-6">
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Father's Name&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="father-name" value={this.state.studentFormResources.father.name}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.name')}
-                                        className="form-control" required placeholder="Enter Name" />
+                                <>
+                                  <div className="row parent-info">
+                                    <div className="form-group row col-6">
+                                      <label className="col-md-3 col-form-label">Father's Photo</label>
+                                      <div className="col-md-5 height-100">
+                                        <input type="file" name="father-photo" id="father-photo" className />
+                                      </div>
+                                    </div>
+                                    <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Father's Name&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="father-name" value={this.state.studentFormResources.father.name}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.name')}
+                                            className="form-control" required placeholder="Enter Name" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="father-quanlification"
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.qualification')}
+                                            value={this.state.studentFormResources.father.qualification}
+                                            className="form-control" required placeholder="Enter Qualification" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="father-occupation"
+                                            value={this.state.studentFormResources.father.occupation}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.occupation')}
+                                            className="form-control" required placeholder="Enter Occupation" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="father-mobile"
+                                            value={this.state.studentFormResources.father.mobileNo}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.mobileNo')}
+                                            className="form-control" required placeholder="Enter Mobile No." />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Email</label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="father-email"
+                                            value={this.state.studentFormResources.father.email}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.email')}
+                                            className="form-control" required placeholder="Enter Email" />
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="father-quanlification"
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.qualification')}
-                                        value={this.state.studentFormResources.father.qualification}
-                                        className="form-control" required placeholder="Enter Qualification" />
+                                  <div className="mt-3 row parent-info">
+                                    <div className="form-group row col-6">
+                                      <label className="col-md-3 col-form-label">Mother's Photo</label>
+                                      <div className="col-md-5 height-100">
+                                        <input type="file" name="mother-photo" id="mother-photo" className />
+                                      </div>
+                                    </div>
+                                    <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Mother's Name&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="mother-name"
+                                            value={this.state.studentFormResources.mother.name}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.name')}
+                                            className="form-control" required placeholder="Enter Name" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="mother-qualification"
+                                            value={this.state.studentFormResources.mother.qualification}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.qualification')}
+                                            className="form-control" required placeholder="Enter Qualification" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="mother-occupation"
+                                            value={this.state.studentFormResources.mother.occupation}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.occupation')}
+                                            className="form-control" required placeholder="Enter Occupation" />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="mother-mobile"
+                                            value={this.state.studentFormResources.mother.mobileNo}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.mobileNo')}
+                                            className="form-control" required placeholder="Enter Mobile No." />
+                                        </div>
+                                      </div>
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Email</label>
+                                        <div className="col-md-9">
+                                          <input type="text" name="mother-email"
+                                            value={this.state.studentFormResources.mother.email}
+                                            onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.email')}
+                                            className="form-control" required placeholder="Enter Email" />
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="father-occupation"
-                                        value={this.state.studentFormResources.father.occupation}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.occupation')}
-                                        className="form-control" required placeholder="Enter Occupation" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="father-mobile"
-                                        value={this.state.studentFormResources.father.mobileNo}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.mobileNo')}
-                                        className="form-control" required placeholder="Enter Mobile No." />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Email</label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="father-email"
-                                        value={this.state.studentFormResources.father.email}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.father.email')}
-                                        className="form-control" required placeholder="Enter Email" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="mt-3 row parent-info">
-                                <div className="form-group row col-6">
-                                  <label className="col-md-3 col-form-label">Mother's Photo</label>
-                                  <div className="col-md-5 height-100">
-                                    <input type="file" name="mother-photo" id="mother-photo" className />
-                                  </div>
-                                </div>
-                                <div className="col-6">
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Mother's Name&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="mother-name"
-                                        value={this.state.studentFormResources.mother.name}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.name')}
-                                        className="form-control" required placeholder="Enter Name" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="mother-qualification"
-                                        value={this.state.studentFormResources.mother.qualification}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.qualification')}
-                                        className="form-control" required placeholder="Enter Qualification" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="mother-occupation"
-                                        value={this.state.studentFormResources.mother.occupation}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.occupation')}
-                                        className="form-control" required placeholder="Enter Occupation" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="mother-mobile"
-                                        value={this.state.studentFormResources.mother.mobileNo}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.mobileNo')}
-                                        className="form-control" required placeholder="Enter Mobile No." />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Email</label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="mother-email"
-                                        value={this.state.studentFormResources.mother.email}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.mother.email')}
-                                        className="form-control" required placeholder="Enter Email" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              </> :
-                              <div className="mt-3 row guardian-info">
-                                <div className="form-group row col-6">
-                                  <label className="col-md-3 col-form-label">Guardian's Photo</label>
-                                  <div className="col-md-5 height-100">
-                                    <input type="file" name="guardian-photo"
+                                </> :
+                                <div className="mt-3 row guardian-info">
+                                  <div className="form-group row col-6">
+                                    <label className="col-md-3 col-form-label">Guardian's Photo</label>
+                                    <div className="col-md-5 height-100">
+                                      <input type="file" name="guardian-photo"
                                         id="guardian-photo" />
+                                    </div>
+                                  </div>
+                                  <div className="col-6">
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Guardian's Name&nbsp;<span className="text-danger">*</span></label>
+                                      <div className="col-md-9">
+                                        <input type="text" name="guardian-name"
+                                          value={this.state.studentFormResources.guardian.name}
+                                          onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.name')}
+                                          className="form-control" placeholder="Enter Name" />
+                                      </div>
+                                    </div>
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
+                                      <div className="col-md-9">
+                                        <input type="text" name="guardian-qualification"
+                                          value={this.state.studentFormResources.guardian.qualification}
+                                          onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.qualification')}
+                                          className="form-control" placeholder="Enter Qualification" />
+                                      </div>
+                                    </div>
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
+                                      <div className="col-md-9">
+                                        <input type="text" name="guardian-occupation"
+                                          value={this.state.studentFormResources.guardian.occupation}
+                                          onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.occupation')}
+                                          className="form-control" placeholder="Enter Occupation" />
+                                      </div>
+                                    </div>
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
+                                      <div className="col-md-9">
+                                        <input type="text" name="guardian-mobile"
+                                          value={this.state.studentFormResources.guardian.mobileNo}
+                                          onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.mobileNo')}
+                                          className="form-control" placeholder="Enter Mobile No." />
+                                      </div>
+                                    </div>
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Email</label>
+                                      <div className="col-md-9">
+                                        <input type="text" name="guardian-email"
+                                          value={this.state.studentFormResources.guardian.email}
+                                          onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.email')}
+                                          className="form-control" placeholder="Enter Email" />
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="col-6">
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Guardian's Name&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="guardian-name"
-                                        value={this.state.studentFormResources.guardian.name}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.name')}
-                                        className="form-control" placeholder="Enter Name" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Qualification&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="guardian-qualification"
-                                        value={this.state.studentFormResources.guardian.qualification}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.qualification')}
-                                        className="form-control" placeholder="Enter Qualification" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Occupation&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="guardian-occupation"
-                                        value={this.state.studentFormResources.guardian.occupation}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.occupation')}
-                                        className="form-control" placeholder="Enter Occupation" />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Mobile No.&nbsp;<span className="text-danger">*</span></label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="guardian-mobile"
-                                        value={this.state.studentFormResources.guardian.mobileNo}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.mobileNo')}
-                                        className="form-control" placeholder="Enter Mobile No." />
-                                    </div>
-                                  </div>
-                                  <div className="form-group row">
-                                    <label className="col-md-3 col-form-label">Email</label>
-                                    <div className="col-md-9">
-                                      <input type="text" name="guardian-email"
-                                        value={this.state.studentFormResources.guardian.email}
-                                        onChange={(event) => this.handleInputChange(event, 'studentFormResources.guardian.email')}
-                                        className="form-control" placeholder="Enter Email" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
                               }
                             </div>
                           </div>
@@ -1586,3 +1592,4 @@ class Students extends AbstractComponent {
 }
 
 export default Students;
+export {AcademicYear,StateDropdown};
