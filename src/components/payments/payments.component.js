@@ -791,61 +791,65 @@ class Payments extends AbstractComponent {
                     <form onSubmit={event => this.handleFeeStructureUpdate(event)}
                       className="col-12 col-sm-10 col-md-8" id="structure-form">                 
                             <div class="form-group row">
+                              <label class="col-4 font-weight-bold">Total Fees Amount</label>
+                              <input disabled placeholder="12000$" type="text" class="col form-control" required min="0"/>                              
+                            </div>
+                            <div class="form-group row mt-2">
                               <label class="col-4 font-weight-bold">Installment Duration</label>
                               <input type="number" class="col form-control" required min="0"/>                              
-                          </div>
-                          <div class="row m-3">
-                          <table class="table table-hover">
-                              <thead>
-                                <tr>
-                                  <th scope="col">S.No</th>
-                                  <th scope="col">Amount</th>
-                                  <th scope="col">Installment Date</th>
-                                  <th scope="col">Extension</th>
-                                  <th scope="col">Extended Date</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr>
-                                  <th scope="row">1</th>
-                                  <td>1000</td>
-                                  <td><input type="date"/></td>
-                                  <td><input type="checkbox"/></td>
-                                  <td><input type="date"/></td>
-                                </tr>
-                                <tr>
-                                  <th scope="row">2</th>
-                                  <td>1000</td>
-                                  <td><input type="date"/></td>
-                                  <td><input type="checkbox"/></td>
-                                  <td><input type="date"/></td>
-                                </tr>
-                                <tr>
-                                  <th scope="row">3</th>
-                                  <td>1000</td>
-                                  <td><input type="date"/></td>
-                                  <td><input type="checkbox"/></td>
-                                  <td><input type="date"/></td>
-                                </tr>
-                              </tbody>
-                            </table>
-                            <div class="form-group row">
-                            <label class="col font-weight-bold">Penalty</label>
-                            <div class="col dropdown"> 
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              Select Type
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                              <a class="dropdown-item" href="#">Flat Based</a>
-                              <a class="dropdown-item" href="#">Percentage Based</a>
                             </div>
-                          </div>
-                          <input type="text"/>
-                          </div>
-                          </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
-                  </div>
+                            <div class="row m-3">
+                            <table class="table table-hover mt-4">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">S.No</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Installment Date</th>
+                                    <th scope="col">Extension</th>
+                                    <th scope="col">Extended Date</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <th scope="row">1</th>
+                                    <td>1000</td>
+                                    <td><input type="date"/></td>
+                                    <td><input type="checkbox"/></td>
+                                    <td><input disabled type="date"/></td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">2</th>
+                                    <td>1000</td>
+                                    <td><input type="date"/></td>
+                                    <td><input type="checkbox"/></td>
+                                    <td><input disabled type="date"/></td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">3</th>
+                                    <td>1000</td>
+                                    <td><input type="date"/></td>
+                                    <td><input type="checkbox"/></td>
+                                    <td><input disabled type="date"/></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <div class="form-group row mt-4">
+                              <label class="col font-weight-bold">Penalty</label>
+                              <div class="col dropdown"> 
+                              <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Select Type
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Flat Based</a>
+                                <a class="dropdown-item" href="#">Percentage Based</a>
+                              </div>
+                            </div>
+                            <input type="text"/>
+                            </div>
+                            </div>
+                          <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                      </form>
+                    </div>
                 </div>
               </div>
             </div>
