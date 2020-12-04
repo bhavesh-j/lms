@@ -3,7 +3,9 @@ import { baseurl } from '../../shared/baseurl';
 import Discharge from '../discharge/discharge.component';
 import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
 import { Link } from 'react-router-dom';
-import swal from 'sweetalert';
+// import swal from 'sweetalert';
+import { toast } from 'toast-notification-alert';
+import DatePicker from "react-datepicker";
 
 
 function StateDropdown(props) {
@@ -225,6 +227,7 @@ class Students extends AbstractComponent {
     this.setState({ admissionFormErrors: [] });
     const permanentAddress = this.state.studentFormResources.permanentAddress.split(',');
     const admissionForm = this.copyObject(this.state.studentForm);
+    admissionForm.dateOfBirth = this.setTimeZoneToUTC(this.state.studentForm.dateOfBirth);
     admissionForm.permanentAddress.street = (permanentAddress.length > 1 ?
       permanentAddress.slice(0, permanentAddress.length - 1).join(',').trim()
       : permanentAddress.join(',').trim());
@@ -291,7 +294,7 @@ class Students extends AbstractComponent {
           }).then(res => {
             this.toggleLoading(false);
             if (res.success) {
-              swal('Form Submitted', 'Form is successfully submitted' ,'success');
+              toast.show({title: 'Form is successfully submitted', position: 'bottomright', type: 'success'});
               this.showFeeForClass(admissionForm.admissionForClass, res.payload);
               const students = this.state.students;
               const admissionForClass = document.getElementById('admission-for-class');
@@ -435,7 +438,7 @@ class Students extends AbstractComponent {
       year: new Date().getFullYear().toString()
     })).then(res => {
       this.toggleLoading(false);
-      swal('Pay Successful!', res.message, 'success');
+      toast.show({title: res.message, position: 'bottomright', type: 'success'});
       this.toggleFeeCard();
       this.setState({ feeToPay: 0 });
     }).catch(err => console.log(err));
@@ -1239,9 +1242,9 @@ class Students extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Date of Birth&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <input value={this.state.studentForm.dateOfBirth}
-                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth')}
-                                  name="dob" data-date-autoclose="true" className="form-control datepicker" placeholder="DD/MM/YYYY" required />
+                                <DatePicker selected={this.state.studentForm.dateOfBirth}
+                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth', 'date')}
+                                  className="form-control" placeholderText="MM/DD/YYYY" required={true} />
                               </div>
                             </div>
                             <div className="form-group row">

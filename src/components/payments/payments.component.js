@@ -1,7 +1,8 @@
 import AbstractComponent from '../abstract/abstract.component';
 import SelectClass from '../selectclass/selectclass.component';
 import { baseurl } from '../../shared/baseurl';
-import swal from 'sweetalert';
+// import swal from 'sweetalert';
+import { toast } from 'toast-notification-alert';
 
 class Payments extends AbstractComponent {
   constructor() {
@@ -123,7 +124,7 @@ class Payments extends AbstractComponent {
         return;
       }
       this.toggleLoading(false);
-      swal('Pay Successful!', res.message, 'success');
+      toast.show({title: res.message, position: 'bottomright', type: 'success'});
       this.setState({
         showReceipt: true,
         showFeeScreen: false,
@@ -167,7 +168,7 @@ class Payments extends AbstractComponent {
         return;
       }
       this.toggleLoading(false);
-      swal('Success', 'Fee information updated successfully!', 'success');
+      toast.show({title: 'Fee information updated successfully!', position: 'bottomright', type: 'success'});
       this.setState({feeMasterStructures: feeData});
     }).catch(err => console.log(err));
   }

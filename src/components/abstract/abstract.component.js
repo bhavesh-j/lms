@@ -1,6 +1,7 @@
 import React from 'react';
 import { apiurl } from '../../shared/baseurl';
-import swal from'sweetalert';
+// import swal from'sweetalert';
+import { toast } from 'toast-notification-alert'
 
 class AbstractComponent extends React.Component {
     constructor() {
@@ -35,13 +36,20 @@ class AbstractComponent extends React.Component {
         }
     }
 
-    handleInputChange(event, name, number=false) {
-        if(number && isNaN(event.target.value)) {
-            return;
+    handleInputChange(event, name, type=false) {
+        let originalValue;
+        if(type === 'date') {
+            originalValue = event;
+        } else {
+            originalValue = event.target.value;
+            if(type && isNaN(originalValue)) {
+                return;
+            }
         }
+
         const attributes = name.split('.');
         if(attributes.length <= 1) {
-            this.setState({[name]: event.target.value});
+            this.setState({[name]: originalValue});
             return;
         }
         const key = attributes[0];
@@ -49,7 +57,7 @@ class AbstractComponent extends React.Component {
         let prevObj = value;
         for(let i=1;i<attributes.length;i++) {
             if(i+1 === attributes.length) {
-                prevObj[attributes[i]] = event.target.value;
+                prevObj[attributes[i]] = originalValue;
             } else {
                 prevObj = prevObj[attributes[i]];
             }
@@ -155,10 +163,15 @@ class AbstractComponent extends React.Component {
     isErrorPresent(payload) {
         this.toggleLoading(false);
         if(payload.Message) {
-            swal('Error!', payload.Message, 'error');
+            // swal('Error!', payload.Message, 'error');
+            toast.show({title: payload.Message, position: 'bottomright', type: 'error'});
             return true;
         }
         return false;
+    }
+
+    setTimeZoneToUTC(date) {
+        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     }
 }
 
