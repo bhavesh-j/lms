@@ -50,7 +50,7 @@ class EditStudent extends AbstractComponent {
               mobileNo: '',
               email: '',
               relationToStudent: 'Father',
-              photo: 'uploads/default.png'
+              photo: 'uploads/default.jpg'
             },
             mother: {
               name: '',
@@ -59,7 +59,7 @@ class EditStudent extends AbstractComponent {
               mobileNo: '',
               email: '',
               relationToStudent: 'Mother',
-              photo: 'uploads/default.png'
+              photo: 'uploads/default.jpg'
             },
             guardian: {
               name: '',
@@ -68,7 +68,7 @@ class EditStudent extends AbstractComponent {
               mobileNo: '',
               email: '',
               relationToStudent: 'Guardian',
-              photo: 'uploads/default.png'
+              photo: 'uploads/default.jpg'
             },
             parentOrGuardian: 'Parents',
             studentId: null,
@@ -101,6 +101,7 @@ class EditStudent extends AbstractComponent {
         this.setState({classes: classes});
         this.callServerMethod('student/'+studentId+'/details')
         .then(student => {
+          setTimeout(() => this.toggleLoading(false), 1);
           if(!student.Message) {
             const father = student.parents.filter(parent => parent.relationToStudent==='Father')[0];
             const mother = student.parents.filter(parent => parent.relationToStudent==='Mother')[0];
@@ -162,7 +163,7 @@ class EditStudent extends AbstractComponent {
               }
             },() => this.toggleLoading(true));
           }
-        })
+        }).catch(err => console.log(err));
       }).catch(err => console.log(err));
     }
 

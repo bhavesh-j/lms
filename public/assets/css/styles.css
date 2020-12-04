@@ -36,7 +36,6 @@ html, body {
     box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     overflow: hidden;
-    background: linear-gradient(to bottom, #a0d9d2 46%, #7e9fc2 100%);
   }
   .identityCard__header {
     display: flex;

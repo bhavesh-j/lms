@@ -28,10 +28,9 @@ class AbstractComponent extends React.Component {
 
     toggleLoading(showLoading) {
         if(showLoading) {
-            document.getElementsByClassName("page-loader-wrapper")[0].style.display = "block";
-            setTimeout(() => this.toggleLoading(false), '10s');
+            Array.prototype.forEach.call(document.getElementsByClassName("page-loader-wrapper"), load => load.style.display = "block");
         } else {
-            document.getElementsByClassName("page-loader-wrapper")[0].style.display = "none";
+            Array.prototype.forEach.call(document.getElementsByClassName("page-loader-wrapper"), load => load.style.display = "none");
         }
     }
 
@@ -42,6 +41,7 @@ class AbstractComponent extends React.Component {
         const attributes = name.split('.');
         if(attributes.length <= 1) {
             this.setState({[name]: event.target.value});
+            return;
         }
         const key = attributes[0];
         const value = this.state[key];
@@ -132,6 +132,20 @@ class AbstractComponent extends React.Component {
         pri.document.close();
         pri.focus();
         pri.print();
+    }
+
+    formatDate(date = null) {
+        var d = date ? new Date(date) : new Date(),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [day, month, year].join('/');
     }
 }
 

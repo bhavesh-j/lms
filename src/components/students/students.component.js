@@ -169,7 +169,9 @@ class Students extends AbstractComponent {
         classId: ''
       },
       showIdCard: false,
-      selectedStudentForIdCard: null
+      selectedStudentForIdCard: null,
+      idCardColor1: '#a0d9d2',
+      idCardColor2: '#7e9fc2'
     };
     this.defaultFormValues = {
       studentForm: this.copyObject(this.state.studentForm),
@@ -184,6 +186,7 @@ class Students extends AbstractComponent {
     this.toggleFeeCard = this.toggleFeeCard.bind(this);
     this.generateIdCard = this.generateIdCard.bind(this);
     this.printIdCard = this.printIdCard.bind(this);
+    this.deleteStudent = this.deleteStudent.bind(this);
   }
 
   componentDidMount() {
@@ -292,7 +295,8 @@ class Students extends AbstractComponent {
                 dateOfBirth: admissionForm.dateOfBirth,
                 gender: admissionForm.gender,
                 dateOfAdmission: new Date().toUTCString(),
-                photo: admissionForm.photo
+                photo: admissionForm.photo,
+                emergencyContact: admissionForm.parents[0]
               });
               this.setState({
                 students: students,
@@ -442,6 +446,15 @@ class Students extends AbstractComponent {
 
   printIdCard() {
     this.printDocument('id-card-wrapper');
+  }
+
+  deleteStudent(studentIndex) {
+    if(window.confirm('Are you sure you want to delete the student!')) {
+      const studentList = this.state.students;
+      const studentToDelete = studentList.splice(studentIndex, 1)[0];
+      this.setState({students: studentList});
+      this.callServerMethod('student/'+studentToDelete.id+'/delete');
+    }
   }
 
   render() {
@@ -680,7 +693,7 @@ class Students extends AbstractComponent {
                       </div>
                     </div> : null}
                     <tbody>
-                        {this.state.students.map(student => {
+                        {this.state.students.map((student, index) => {
                           return (
                             <tr key={student.id}>
                                 <td style={{width: 60}}>
@@ -696,7 +709,9 @@ class Students extends AbstractComponent {
                                 <td>
                                     <Link to={"view-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
                                     <Link to={"edit-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
-                                    <button type="button" className="btn btn-icon btn-sm js-sweetalert" title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"></i></button>
+                                    <button type="button" className="btn btn-icon btn-sm js-sweetalert"
+                                      title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"
+                                      onClick={() => this.deleteStudent(index)}></i></button>
                                 </td>
                             </tr>
                           );
@@ -785,6 +800,26 @@ class Students extends AbstractComponent {
                       <button className="ml-auto btn btn-primary" onClick={this.printIdCard}
                         disabled={!this.state.selectedStudentForIdCard}>Print</button>
                     </div>
+                    <div>
+                      <div className="row mt-4">
+                        <div class="input-group col-6" title="Background Color 1">
+                          <input type="text" class="form-control" value={this.state.idCardColor1}
+                            readOnly={true} autoComplete="off"/>
+                          <div class="input-group-append">
+                            <input type="color" value={this.state.idCardColor1}
+                              onChange={event => this.handleInputChange(event, 'idCardColor1')} className="btn" />
+                          </div>
+                        </div>
+                        <div class="input-group col-6" title="Background Color 2">
+                          <input type="text" class="form-control" value={this.state.idCardColor2}
+                            readOnly={true} autoComplete="off"/>
+                          <div class="input-group-append">
+                            <input type="color" value={this.state.idCardColor2}
+                              onChange={event => this.handleInputChange(event, 'idCardColor2')} className="btn" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     {!this.state.selectedStudentForIdCard ?
                       <div id="id-card-loading" style={{ height: '20em' }}>
                         <div className="spinner-border" role="status">
@@ -792,7 +827,7 @@ class Students extends AbstractComponent {
                         </div>
                       </div> :
                       <div className="wrapper" id="id-card-wrapper">
-                        <div className="identityCard">
+                        <div className="identityCard" style={{background: 'linear-gradient(to bottom, '+this.state.idCardColor1+' 46%, '+this.state.idCardColor2+' 100%)'}}>
                           <header className="identityCard__header d-flex flex-column text-center">
                             <div>Central Academy School</div>
                             <div>Identity Card</div>
@@ -1179,8 +1214,9 @@ class Students extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Class Section</label>
                               <div className="col-md-9">
-                                <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
-                                  handleInputChange={this.handleInputChange} value={this.state.studentForm.classSection} />
+                              <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
+                                  onChange={(event) => this.handleInputChange(event, 'studentForm.classSection')}
+                                  readOnly={this.props.readOnly} value={this.state.studentForm.classSection} />
                               </div>
                             </div>
                             <div className="form-group row">

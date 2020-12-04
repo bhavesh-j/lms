@@ -10,7 +10,6 @@ class Discharge extends AbstractComponent {
             students: [],
             classes: [],
             isStudentsLoading: false,
-            students: [],
             studentsSearchParam: {
                 name: '',
                 classId: ''
@@ -23,14 +22,14 @@ class Discharge extends AbstractComponent {
     
 
     generateLeaveCerti(studentIndex){
-    const studentId = this.state.students[studentIndex].id;
-    this.setState({showLeavingCertificate: false});
-    this.callServerMethod('student/'+studentId)
-    .then(student => {
-      this.setState({
-        selectedStudentForLeaveCerti: student
-      });
-    }).catch(err => console.log(err));
+      const studentId = this.state.students[studentIndex].id;
+      this.setState({showLeavingCertificate: false});
+      this.callServerMethod('student/'+studentId)
+      .then(student => {
+        this.setState({
+          selectedStudentForLeaveCerti: student
+        });
+      }).catch(err => console.log(err));
     }
 
     printLeaveCerti(){
@@ -55,7 +54,13 @@ class Discharge extends AbstractComponent {
     render() {
         return (
         <div className="tab-pane" id="Student-discharge">
-                <form className="card" onSubmit={event => this.handleStudentSearch(event, 'students')}>
+                <form className="card" onSubmit={event => {
+                  this.setState({
+                    showLeavingCertificate: false,
+                    selectedStudentForLeaveCerti: null
+                  });
+                  this.handleStudentSearch(event, 'students');
+                }}>
                   <div className="card-body">
                     <div className="row">
                       <div className="col-lg-2 col-md-9 col-sm-6">
@@ -82,6 +87,7 @@ class Discharge extends AbstractComponent {
                   </div>
                 </form>
                 <div className="table-responsive card">
+                  {this.state.showLeavingCertificate ?
                   <table id="student-table" className="table table-hover table-vcenter table-striped mb-0 text-nowrap">
                     <thead>
                       <tr>
@@ -101,15 +107,15 @@ class Discharge extends AbstractComponent {
                           return (
                             <tr key={student.id}>
                                 <td className="w-60">
-                                    <img className="avatar" src={student.photo ? student.photo : baseurl+'uploads/default.jpg'} alt="" />
+                                    <img className="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="Profile" />
                                 </td>
                                 <td>{student.id}</td>
                                 <td>{student.firstName} {student.lastName}</td>
-                                <td>{student.className} {student.sectionName?('('+student.sectionName+')'):''}</td>
+                                <td>{student.className}</td>
                                 <td>{new Date(student.dateOfBirth).toDateString()}</td>
                                 <td>{student.gender}</td>
-                                <td>-- To be added --</td>
-                                <td>-- To be added --</td>
+                                <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
+                                <td>{student.emergencyContact.mobileNo}</td>
                                 <td>
                                     <button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button>
                                     <button type="button" className="btn btn-icon btn-sm" title="Edit" onClick={() => this.generateLeaveCerti(index)}><i className="fa fa-edit"></i></button>                                    
@@ -118,10 +124,13 @@ class Discharge extends AbstractComponent {
                           );
                         })}
                     </tbody>
-                  </table>                  
+                  </table> : null}              
                 </div>
               
-              {!this.state.showLeavingCertificate ? <LeaveCerti></LeaveCerti> : null}
+              {!this.state.showLeavingCertificate ? 
+                this.state.selectedStudentForLeaveCerti ?
+                  <LeaveCerti student={this.state.selectedStudentForLeaveCerti}></LeaveCerti>
+                  : <div class="h3">Loading ...</div> : null}
               </div>
         )};
 }
