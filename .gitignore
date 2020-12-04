@@ -6,7 +6,7 @@
 .pnp.js
 /_cacache
 /_locks
-
+/src/components/shared
 # testing
 /coverage
 
