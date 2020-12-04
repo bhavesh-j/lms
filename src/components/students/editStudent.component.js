@@ -5,6 +5,10 @@ import SelectClass, {SelectClassSection} from '../selectclass/selectclass.compon
 import {StateDropdown} from "../students/students.component";
 import Header from '../header/header.component';
 import Footer from '../footer/footer.component';
+// import swal from 'sweetalert';
+import { toast } from 'toast-notification-alert';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 class EditStudent extends AbstractComponent {
     constructor(){
@@ -100,72 +104,79 @@ class EditStudent extends AbstractComponent {
       this.toggleLoading(true);
       this.fetchClasses()
       .then(classes => {
+        if(this.isErrorPresent(classes)) {
+          return;
+        }
         this.setState({classes: classes});
-        this.callServerMethod('student/'+studentId+'/details')
-        .then(student => {
-          setTimeout(() => this.toggleLoading(false), 1);
-          if(!student.Message) {
-            const father = student.parents.filter(parent => parent.relationToStudent==='Father')[0];
-            const mother = student.parents.filter(parent => parent.relationToStudent==='Mother')[0];
-            const guardian = student.parents.filter(parent => parent.relationToStudent==='Guardian')[0];
-            this.setState({
-              studentForm: {
-                id: this.props.match.params.studentId,
-                firstName: student.firstName,
-                lastName: student.lastName,
-                admissionForClass: student.admissionForClass,
-                classSection: student.classSection,
-                dateOfBirth: student.dateOfBirth.split('T')[0],
-                placeOfBirth: student.placeOfBirth,
-                nationality: student.nationality,
-                gender: student.gender,
-                permanentAddress: student.permanentAddress,
-                caste: student.caste,
-                relegion: student.relegion,
-                presentAddress: student.presentAddress,
-                motherTongue: student.motherTongue,
-                aadharNo: student.aadharNo,
-                photo: student.photo,
-                bloodGroup: student.bloodGroup,
-                parents: student.parents
+      }).catch(err => console.log(err));
+
+      this.callServerMethod('student/'+studentId+'/details')
+      .then(student => {
+        setTimeout(() => this.toggleLoading(false), 1);
+        if(this.isErrorPresent(student)) {
+          return;
+        }
+        if(!student.Message) {
+          const father = student.parents.filter(parent => parent.relationToStudent==='Father')[0];
+          const mother = student.parents.filter(parent => parent.relationToStudent==='Mother')[0];
+          const guardian = student.parents.filter(parent => parent.relationToStudent==='Guardian')[0];
+          this.setState({
+            studentForm: {
+              id: this.props.match.params.studentId,
+              firstName: student.firstName,
+              lastName: student.lastName,
+              admissionForClass: student.admissionForClass,
+              classSection: student.classSection,
+              dateOfBirth: new Date(student.dateOfBirth),
+              placeOfBirth: student.placeOfBirth,
+              nationality: student.nationality,
+              gender: student.gender,
+              permanentAddress: student.permanentAddress,
+              caste: student.caste,
+              relegion: student.relegion,
+              presentAddress: student.presentAddress,
+              motherTongue: student.motherTongue,
+              aadharNo: student.aadharNo,
+              photo: student.photo,
+              bloodGroup: student.bloodGroup,
+              parents: student.parents
+            },
+            studentFormResources: {
+              permanentAddress: student.permanentAddress.street+' '+student.permanentAddress.city,
+              presentAddress: student.presentAddress.street+' '+student.presentAddress.city,
+              permanentAndPresentAddressSame: JSON.stringify(student.permanentAddress)===JSON.stringify(student.presentAddress),
+              father: {
+                name: father ? father.firstName+' '+father.lastName : null,
+                qualification: father ? father.qualification : null,
+                occupation: father ? father.occupation : null,
+                mobileNo: father ? father.mobileNo : null,
+                email: father ? father.email : null,
+                relationToStudent: 'Father',
+                photo: father ? father.photo : null,
               },
-              studentFormResources: {
-                permanentAddress: student.permanentAddress.street+' '+student.permanentAddress.city,
-                presentAddress: student.presentAddress.street+' '+student.presentAddress.city,
-                permanentAndPresentAddressSame: JSON.stringify(student.permanentAddress)===JSON.stringify(student.presentAddress),
-                father: {
-                  name: father ? father.firstName+' '+father.lastName : null,
-                  qualification: father ? father.qualification : null,
-                  occupation: father ? father.occupation : null,
-                  mobileNo: father ? father.mobileNo : null,
-                  email: father ? father.email : null,
-                  relationToStudent: 'Father',
-                  photo: father ? father.photo : null,
-                },
-                mother: {
-                  name: mother ? mother.firstName+' '+mother.lastName : null,
-                  qualification: mother ? mother.qualification : null,
-                  occupation: mother ? mother.occupation : null,
-                  mobileNo: mother ? mother.mobileNo : null,
-                  email: mother ? mother.email : null,
-                  relationToStudent: 'Mother',
-                  photo: mother ? mother.photo : null,
-                },
-                guardian: {
-                  name: guardian ? guardian.firstName+' '+guardian.lastName : null,
-                  qualification: guardian ? guardian.qualification : null,
-                  occupation: guardian ? guardian.occupation : null,
-                  mobileNo: guardian ? guardian.mobileNo : null,
-                  email: guardian ? guardian.email : null,
-                  relationToStudent: 'Gaurdian',
-                  photo: guardian ? guardian.photo : null,
-                },
-                parentOrGuardian: (student.parents[0].relationToStudent !== 'Guardian' ? 'Parents' : 'Guardian'),
-                studentId: studentId
-              }
-            },() => this.toggleLoading(true));
-          }
-        }).catch(err => console.log(err));
+              mother: {
+                name: mother ? mother.firstName+' '+mother.lastName : null,
+                qualification: mother ? mother.qualification : null,
+                occupation: mother ? mother.occupation : null,
+                mobileNo: mother ? mother.mobileNo : null,
+                email: mother ? mother.email : null,
+                relationToStudent: 'Mother',
+                photo: mother ? mother.photo : null,
+              },
+              guardian: {
+                name: guardian ? guardian.firstName+' '+guardian.lastName : null,
+                qualification: guardian ? guardian.qualification : null,
+                occupation: guardian ? guardian.occupation : null,
+                mobileNo: guardian ? guardian.mobileNo : null,
+                email: guardian ? guardian.email : null,
+                relationToStudent: 'Gaurdian',
+                photo: guardian ? guardian.photo : null,
+              },
+              parentOrGuardian: (student.parents[0].relationToStudent !== 'Guardian' ? 'Parents' : 'Guardian'),
+              studentId: studentId
+            }
+          },() => this.toggleLoading(true));
+        }
       }).catch(err => console.log(err));
     }
 
@@ -175,6 +186,8 @@ class EditStudent extends AbstractComponent {
       this.setState({ admissionFormErrors: [] });
       const permanentAddress = this.state.studentFormResources.permanentAddress.split(',');
       const admissionForm = this.copyObject(this.state.studentForm);
+      console.log(this.state.studentForm.dateOfBirth.toString());
+      admissionForm.dateOfBirth = this.setTimeZoneToUTC(this.state.studentForm.dateOfBirth);
       admissionForm.permanentAddress.street = (permanentAddress.length > 1 ?
         permanentAddress.slice(0, permanentAddress.length - 1).join(',').trim()
         : permanentAddress.join(',').trim());
@@ -243,9 +256,8 @@ class EditStudent extends AbstractComponent {
               }, JSON.stringify(admissionForm));
             }).then(res => {
               this.toggleLoading(false);
-              console.log(res);
               if (res.success) {
-                alert('Form Submittes Form is successfully submitted success');
+                toast.show({title: 'Form is successfully submitted', position: 'bottomright', type: 'success'});
                 this.props.history.goBack();
               } else {
                 let listErrors = [];
@@ -378,9 +390,9 @@ class EditStudent extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Date of Birth&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <input readOnly={this.props.readOnly} value={this.state.studentForm.dateOfBirth}
-                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth')}
-                                  name="dob" data-date-autoclose="true" className="form-control datepicker" placeholder="DD/MM/YYYY" required />
+                                <DatePicker selected={this.state.studentForm.dateOfBirth} readOnly={this.props.readOnly}
+                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth', 'date')}
+                                  className="form-control" placeholderText="MM/DD/YYYY" required={true} />
                               </div>
                             </div>
                             <div className="form-group row">

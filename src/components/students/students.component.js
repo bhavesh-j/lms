@@ -6,6 +6,9 @@ import { Link } from 'react-router-dom';
 import './students.component.css';
 import Header from '../header/header.component';
 import Footer from '../footer/footer.component';
+// import swal from 'sweetalert';
+import { toast } from 'toast-notification-alert';
+import DatePicker from "react-datepicker";
 
 
 function StateDropdown(props) {
@@ -202,17 +205,25 @@ class Students extends AbstractComponent {
 
     this.setState({ isStudentsLoading: true });
     this.fetchClasses()
-      .then(classes => {
-        this.callServerMethod('student')
-          .then(students => {
-            this.setState({
-              isStudentsLoading: false,
-              //students: students //no data image handle.
-            });
-          });
-        this.setState({ classes: classes });
-      }).catch(err => console.log(err));
+    .then(classes => {
+      if(this.isErrorPresent(classes)){
+        return;
+      }
+      this.setState({ classes: classes });
+    }).catch(err => console.log(err));
+    
+    this.callServerMethod('student')
+    .then(students => {
+      if(this.isErrorPresent(students)){
+        return;
+      }
+      this.setState({
+        isStudentsLoading: false,
+        students: students
+      });
+    });
   }
+
 
   handleAdmissionFormSubmit(event) {
     event.preventDefault();
@@ -220,6 +231,7 @@ class Students extends AbstractComponent {
     this.setState({ admissionFormErrors: [] });
     const permanentAddress = this.state.studentFormResources.permanentAddress.split(',');
     const admissionForm = this.copyObject(this.state.studentForm);
+    admissionForm.dateOfBirth = this.setTimeZoneToUTC(this.state.studentForm.dateOfBirth);
     admissionForm.permanentAddress.street = (permanentAddress.length > 1 ?
       permanentAddress.slice(0, permanentAddress.length - 1).join(',').trim()
       : permanentAddress.join(',').trim());
@@ -286,7 +298,7 @@ class Students extends AbstractComponent {
           }).then(res => {
             this.toggleLoading(false);
             if (res.success) {
-              alert('Form Submittes Form is successfully submitted success');
+              toast.show({title: 'Form is successfully submitted', position: 'bottomright', type: 'success'});
               this.showFeeForClass(admissionForm.admissionForClass, res.payload);
               const students = this.state.students;
               const admissionForClass = document.getElementById('admission-for-class');
@@ -430,7 +442,7 @@ class Students extends AbstractComponent {
       year: new Date().getFullYear().toString()
     })).then(res => {
       this.toggleLoading(false);
-      console.log('Pay Successful!', res.message, 'success');
+      toast.show({title: res.message, position: 'bottomright', type: 'success'});
       this.toggleFeeCard();
       this.setState({ feeToPay: 0 });
     }).catch(err => console.log(err));
@@ -480,7 +492,7 @@ class Students extends AbstractComponent {
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Student-all">List View</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#generate-id-card">Generate Id Card</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-profile">Profile</a></li>
-                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Add</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Admission Form</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-discharge">Discharge</a></li>
               </ul>
             </div>
@@ -1082,9 +1094,9 @@ class Students extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Date of Birth&nbsp;<span className="text-danger">*</span></label>
                               <div className="col-md-9">
-                                <input value={this.state.studentForm.dateOfBirth}
-                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth')}
-                                  name="dob" data-date-autoclose="true" className="form-control datepicker" placeholder="DD/MM/YYYY" required />
+                                <DatePicker selected={this.state.studentForm.dateOfBirth}
+                                  onChange={(event) => this.handleInputChange(event, 'studentForm.dateOfBirth', 'date')}
+                                  className="form-control" placeholderText="MM/DD/YYYY" required={true} />
                               </div>
                             </div>
                             <div className="form-group row">
@@ -1278,13 +1290,13 @@ class Students extends AbstractComponent {
                               {this.state.studentFormResources.parentOrGuardian === 'Parents' ?
                                 <>
                                   <div className="row parent-info">
-                                    <div className="form-group row col-6">
-                                      <label className="col-md-3 col-form-label">Father's Photo</label>
-                                      <div className="col-md-5 height-100">
-                                        <input type="file" name="father-photo" id="father-photo" className />
-                                      </div>
-                                    </div>
                                     <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Father's Photo</label>
+                                        <div className="col-md-5 height-100">
+                                          <input type="file" name="father-photo" id="father-photo" className />
+                                        </div>
+                                      </div>
                                       <div className="form-group row">
                                         <label className="col-md-3 col-form-label">Father's Name&nbsp;<span className="text-danger">*</span></label>
                                         <div className="col-md-9">
@@ -1330,15 +1342,13 @@ class Students extends AbstractComponent {
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="mt-3 row parent-info">
-                                    <div className="form-group row col-6">
-                                      <label className="col-md-3 col-form-label">Mother's Photo</label>
-                                      <div className="col-md-5 height-100">
-                                        <input type="file" name="mother-photo" id="mother-photo" className />
-                                      </div>
-                                    </div>
                                     <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Mother's Photo</label>
+                                        <div className="col-md-5 height-100">
+                                          <input type="file" name="mother-photo" id="mother-photo" className />
+                                        </div>
+                                      </div>
                                       <div className="form-group row">
                                         <label className="col-md-3 col-form-label">Mother's Name&nbsp;<span className="text-danger">*</span></label>
                                         <div className="col-md-9">
@@ -1388,14 +1398,14 @@ class Students extends AbstractComponent {
                                   </div>
                                 </> :
                                 <div className="mt-3 row guardian-info">
-                                  <div className="form-group row col-6">
-                                    <label className="col-md-3 col-form-label">Guardian's Photo</label>
-                                    <div className="col-md-5 height-100">
-                                      <input type="file" name="guardian-photo"
-                                        id="guardian-photo" />
-                                    </div>
-                                  </div>
                                   <div className="col-6">
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Guardian's Photo</label>
+                                      <div className="col-md-5 height-100">
+                                        <input type="file" name="guardian-photo"
+                                          id="guardian-photo" />
+                                      </div>
+                                    </div>
                                     <div className="form-group row">
                                       <label className="col-md-3 col-form-label">Guardian's Name&nbsp;<span className="text-danger">*</span></label>
                                       <div className="col-md-9">

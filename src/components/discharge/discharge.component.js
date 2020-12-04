@@ -26,6 +26,9 @@ class Discharge extends AbstractComponent {
       this.setState({showLeavingCertificate: false});
       this.callServerMethod('student/'+studentId)
       .then(student => {
+        if(this.isErrorPresent(student)) {
+          return;
+        }
         this.setState({
           selectedStudentForLeaveCerti: student
         });
@@ -42,6 +45,9 @@ class Discharge extends AbstractComponent {
     .then(classes => {
       this.callServerMethod('student')
       .then(students => {
+        if(this.isErrorPresent(students)) {
+          return;
+        }
         this.setState({
           isStudentsLoading: false,
           students: students
