@@ -643,7 +643,7 @@ class Students extends AbstractComponent {
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Student-all">List View</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#generate-id-card">Generate Id Card</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-profile">Profile</a></li>
-                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Add</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Admission Form</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-discharge">Discharge</a></li>
               </ul>
             </div>
@@ -1435,13 +1435,13 @@ class Students extends AbstractComponent {
                               {this.state.studentFormResources.parentOrGuardian === 'Parents' ?
                                 <>
                                   <div className="row parent-info">
-                                    <div className="form-group row col-6">
-                                      <label className="col-md-3 col-form-label">Father's Photo</label>
-                                      <div className="col-md-5 height-100">
-                                        <input type="file" name="father-photo" id="father-photo" className />
-                                      </div>
-                                    </div>
                                     <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Father's Photo</label>
+                                        <div className="col-md-5 height-100">
+                                          <input type="file" name="father-photo" id="father-photo" className />
+                                        </div>
+                                      </div>
                                       <div className="form-group row">
                                         <label className="col-md-3 col-form-label">Father's Name&nbsp;<span className="text-danger">*</span></label>
                                         <div className="col-md-9">
@@ -1487,15 +1487,13 @@ class Students extends AbstractComponent {
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="mt-3 row parent-info">
-                                    <div className="form-group row col-6">
-                                      <label className="col-md-3 col-form-label">Mother's Photo</label>
-                                      <div className="col-md-5 height-100">
-                                        <input type="file" name="mother-photo" id="mother-photo" className />
-                                      </div>
-                                    </div>
                                     <div className="col-6">
+                                      <div className="form-group row">
+                                        <label className="col-md-3 col-form-label">Mother's Photo</label>
+                                        <div className="col-md-5 height-100">
+                                          <input type="file" name="mother-photo" id="mother-photo" className />
+                                        </div>
+                                      </div>
                                       <div className="form-group row">
                                         <label className="col-md-3 col-form-label">Mother's Name&nbsp;<span className="text-danger">*</span></label>
                                         <div className="col-md-9">
@@ -1545,14 +1543,14 @@ class Students extends AbstractComponent {
                                   </div>
                                 </> :
                                 <div className="mt-3 row guardian-info">
-                                  <div className="form-group row col-6">
-                                    <label className="col-md-3 col-form-label">Guardian's Photo</label>
-                                    <div className="col-md-5 height-100">
-                                      <input type="file" name="guardian-photo"
-                                        id="guardian-photo" />
-                                    </div>
-                                  </div>
                                   <div className="col-6">
+                                    <div className="form-group row">
+                                      <label className="col-md-3 col-form-label">Guardian's Photo</label>
+                                      <div className="col-md-5 height-100">
+                                        <input type="file" name="guardian-photo"
+                                          id="guardian-photo" />
+                                      </div>
+                                    </div>
                                     <div className="form-group row">
                                       <label className="col-md-3 col-form-label">Guardian's Name&nbsp;<span className="text-danger">*</span></label>
                                       <div className="col-md-9">

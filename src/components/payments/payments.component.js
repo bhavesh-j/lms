@@ -805,8 +805,8 @@ class Payments extends AbstractComponent {
                       </div>
                       <div class="col-12 col-md-2">
                           <div class="col-md-9">
-                              <img src={this.state.feeResources.student.photo
-                                ? this.state.feeResources.student.photo : baseurl+'uploads/default.jpg'}
+                              <img src={baseurl+(this.state.feeResources.student.photo
+                                ? this.state.feeResources.student.photo : 'uploads/default.jpg')}
                                 class="rounded float-left" alt="Profile" />
                           </div>
                       </div>
