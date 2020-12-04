@@ -19,6 +19,7 @@ class Main extends Component {
                     <EditStudent history={props.history} match={props.match} readOnly={false}/>}/>
                 <Route exact path="/view-student/:studentId" component={(props) =>
                     <EditStudent history={props.history} match={props.match} readOnly={true}/>}/>
+                {/* <Route exact path="/header" component={Header}/> */}
                 <Route path="/not-found" component={NotFound} />
                 {/* <Redirect to="not-found" /> */}
             </>

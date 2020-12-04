@@ -1,0 +1,18 @@
+.text-info{
+    height: 4rem;
+    width: 4rem;
+    display: flex;
+    margin: 60px auto;
+}
+
+.noData{
+    height: 10rem;
+    width: 10rem;
+    display: flex;
+    margin: 30px auto;
+}
+
+.noDataText{
+    text-align: center;
+    font-size: 1.8em;
+}

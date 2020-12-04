@@ -1,8 +1,11 @@
 import AbstractComponent from '../abstract/abstract.component';
 import { baseurl } from '../../shared/baseurl';
 import Discharge from '../discharge/discharge.component';
-import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
+import SelectClass, { SelectClassSection } from '../selectclass/selectclass.component';
 import { Link } from 'react-router-dom';
+import './students.component.css';
+import Header from '../header/header.component';
+import Footer from '../footer/footer.component';
 
 
 function StateDropdown(props) {
@@ -204,7 +207,7 @@ class Students extends AbstractComponent {
           .then(students => {
             this.setState({
               isStudentsLoading: false,
-              students: students
+              //students: students //no data image handle.
             });
           });
         this.setState({ classes: classes });
@@ -449,11 +452,11 @@ class Students extends AbstractComponent {
   }
 
   deleteStudent(studentIndex) {
-    if(window.confirm('Are you sure you want to delete the student!')) {
+    if (window.confirm('Are you sure you want to delete the student!')) {
       const studentList = this.state.students;
       const studentToDelete = studentList.splice(studentIndex, 1)[0];
-      this.setState({students: studentList});
-      this.callServerMethod('student/'+studentToDelete.id+'/delete');
+      this.setState({ students: studentList });
+      this.callServerMethod('student/' + studentToDelete.id + '/delete');
     }
   }
 
@@ -461,165 +464,7 @@ class Students extends AbstractComponent {
     return (
       <div className="page">
         {/* Start Page header */}
-        <div className="section-body" id="page_top">
-          <div className="container-fluid">
-            <div className="page-header">
-              <div className="left">
-                <div className="input-group">
-                  <input type="text" className="form-control" placeholder="What you want to find" />
-                  <div className="input-group-append">
-                    <button className="btn btn-outline-secondary" type="button">Search</button>
-                  </div>
-                </div>
-              </div>
-              <div className="right">
-                <ul className="nav nav-pills">
-                  <li className="nav-item dropdown">
-                    <a className="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)" role="button" aria-haspopup="true" aria-expanded="false">Pages</a>
-                    <div className="dropdown-menu">
-                      <a className="dropdown-item" href="page-empty.html">Empty page</a>
-                      <a className="dropdown-item" href="page-profile.html">Profile</a>
-                      <a className="dropdown-item" href="page-search.html">Search Results</a>
-                      <a className="dropdown-item" href="page-timeline.html">Timeline</a>
-                      <a className="dropdown-item" href="page-invoices.html">Invoices</a>
-                      <a className="dropdown-item" href="page-pricing.html">Pricing</a>
-                    </div>
-                  </li>
-                  <li className="nav-item dropdown">
-                    <a className="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Auth</a>
-                    <div className="dropdown-menu">
-                      <a className="dropdown-item" href="login.html">Login</a>
-                      <a className="dropdown-item" href="register.html">Register</a>
-                      <a className="dropdown-item" href="forgot-password.html">Forgot password</a>
-                      <div className="dropdown-divider" />
-                      <a className="dropdown-item" href="404.html">404 error</a>
-                      <a className="dropdown-item" href="500.html">500 error</a>
-                    </div>
-                  </li>
-                </ul>
-                <div className="notification d-flex">
-                  <div className="dropdown d-flex">
-                    <a className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1" data-toggle="dropdown"><i className="fa fa-language" /></a>
-                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                      <a className="dropdown-item" href="#"><img className="w20 mr-2" src="../assets/images/flags/us.svg" alt="" />English</a>
-                      <div className="dropdown-divider" />
-                      <a className="dropdown-item" href="#"><img className="w20 mr-2" src="../assets/images/flags/es.svg" alt="" />Spanish</a>
-                      <a className="dropdown-item" href="#"><img className="w20 mr-2" src="../assets/images/flags/jp.svg" alt="" />japanese</a>
-                      <a className="dropdown-item" href="#"><img className="w20 mr-2" src="../assets/images/flags/bl.svg" alt="" />France</a>
-                    </div>
-                  </div>
-                  <div className="dropdown d-flex">
-                    <a className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1" data-toggle="dropdown"><i className="fa fa-envelope" /><span className="badge badge-success nav-unread" /></a>
-                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                      <ul className="right_chat list-unstyled w350 p-0">
-                        <li className="online">
-                          <a href="javascript:void(0);" className="media">
-                            <img className="media-object" src="../assets/images/xs/avatar4.jpg" alt="" />
-                            <div className="media-body">
-                              <span className="name">Donald Gardner</span>
-                              <div className="message">It is a long established fact that a reader</div>
-                              <small>11 mins ago</small>
-                              <span className="badge badge-outline status" />
-                            </div>
-                          </a>
-                        </li>
-                        <li className="online">
-                          <a href="javascript:void(0);" className="media">
-                            <img className="media-object " src="../assets/images/xs/avatar5.jpg" alt="" />
-                            <div className="media-body">
-                              <span className="name">Wendy Keen</span>
-                              <div className="message">There are many variations of passages of Lorem Ipsum</div>
-                              <small>18 mins ago</small>
-                              <span className="badge badge-outline status" />
-                            </div>
-                          </a>
-                        </li>
-                        <li className="offline">
-                          <a href="javascript:void(0);" className="media">
-                            <img className="media-object " src="../assets/images/xs/avatar2.jpg" alt="" />
-                            <div className="media-body">
-                              <span className="name">Matt Rosales</span>
-                              <div className="message">Contrary to popular belief, Lorem Ipsum is not simply</div>
-                              <small>27 mins ago</small>
-                              <span className="badge badge-outline status" />
-                            </div>
-                          </a>
-                        </li>
-                        <li className="online">
-                          <a href="javascript:void(0);" className="media">
-                            <img className="media-object " src="../assets/images/xs/avatar3.jpg" alt="" />
-                            <div className="media-body">
-                              <span className="name">Phillip Smith</span>
-                              <div className="message">It has roots in a piece of classical Latin literature from 45 BC</div>
-                              <small>33 mins ago</small>
-                              <span className="badge badge-outline status" />
-                            </div>
-                          </a>
-                        </li>
-                      </ul>
-                      <div className="dropdown-divider" />
-                      <a href="javascript:void(0)" className="dropdown-item text-center text-muted-dark readall">Mark all as read</a>
-                    </div>
-                  </div>
-                  <div className="dropdown d-flex">
-                    <a className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1" data-toggle="dropdown"><i className="fa fa-bell" /><span className="badge badge-primary nav-unread" /></a>
-                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                      <ul className="list-unstyled feeds_widget">
-                        <li>
-                          <div className="feeds-left">
-                            <span className="avatar avatar-blue"><i className="fa fa-check" /></span>
-                          </div>
-                          <div className="feeds-body ml-3">
-                            <p className="text-muted mb-0">Campaign <strong className="text-blue font-weight-bold">Holiday</strong> is nearly reach budget limit.</p>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="feeds-left">
-                            <span className="avatar avatar-green"><i className="fa fa-user" /></span>
-                          </div>
-                          <div className="feeds-body ml-3">
-                            <p className="text-muted mb-0">New admission <strong className="text-green font-weight-bold">32</strong> in computer department.</p>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="feeds-left">
-                            <span className="avatar avatar-red"><i className="fa fa-info" /></span>
-                          </div>
-                          <div className="feeds-body ml-3">
-                            <p className="text-muted mb-0">6th sem result <strong className="text-red font-weight-bold">67%</strong> in computer department.</p>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="feeds-left">
-                            <span className="avatar avatar-azure"><i className="fa fa-thumbs-o-up" /></span>
-                          </div>
-                          <div className="feeds-body ml-3">
-                            <p className="text-muted mb-0">New Feedback <strong className="text-azure font-weight-bold">53</strong> for university assessment.</p>
-                          </div>
-                        </li>
-                      </ul>
-                      <div className="dropdown-divider" />
-                      <a href="javascript:void(0)" className="dropdown-item text-center text-muted-dark readall">Mark all as read</a>
-                    </div>
-                  </div>
-                  <div className="dropdown d-flex">
-                    <a href="javascript:void(0)" className="chip ml-3" data-toggle="dropdown">
-                      <span className="avatar" style={{ backgroundImage: 'url(../assets/images/xs/avatar5.jpg)' }} /> George</a>
-                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                      <a className="dropdown-item" href="page-profile.html"><i className="dropdown-icon fe fe-user" /> Profile</a>
-                      <a className="dropdown-item" href="app-setting.html"><i className="dropdown-icon fe fe-settings" /> Settings</a>
-                      <a className="dropdown-item" href="app-email.html"><span className="float-right"><span className="badge badge-primary">6</span></span><i className="dropdown-icon fe fe-mail" /> Inbox</a>
-                      <a className="dropdown-item" href="javascript:void(0)"><i className="dropdown-icon fe fe-send" /> Message</a>
-                      <div className="dropdown-divider" />
-                      <a className="dropdown-item" href="javascript:void(0)"><i className="dropdown-icon fe fe-help-circle" /> Need help?</a>
-                      <a className="dropdown-item" href="login.html"><i className="dropdown-icon fe fe-log-out" /> Sign out</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Header />
         {/* Start Page title and tab */}
         <div className="section-body">
           <div className="container-fluid">
@@ -686,38 +531,44 @@ class Students extends AbstractComponent {
                         <th></th>
                       </tr>
                     </thead>
-                    {this.state.isStudentsLoading ?
-                    <div class="d-flex justify-content-center">
-                      <div class="spinner-border text-info my-5" role="status">
-                        <span class="sr-only">Loading...</span>
-                      </div>
-                    </div> : null}
-                    <tbody>
-                        {this.state.students.map((student, index) => {
-                          return (
-                            <tr key={student.id}>
-                                <td style={{width: 60}}>
-                                    <img className="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
-                                </td>
-                                <td>{student.id}</td>
-                                <td>{student.firstName} {student.lastName}</td>
-                                <td>{student.className}</td>
-                                <td>{new Date(student.dateOfBirth).toDateString()}</td>
-                                <td>{student.gender}</td>
-                                <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
-								                <td>{student.emergencyContact.mobileNo}</td>
-                                <td>
-                                    <Link to={"view-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
-                                    <Link to={"edit-student/"+student.id}><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
-                                    <button type="button" className="btn btn-icon btn-sm js-sweetalert"
-                                      title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"
-                                      onClick={() => this.deleteStudent(index)}></i></button>
-                                </td>
-                            </tr>
-                          );
-                        })}
+                    <tbody>                    
+                      {this.state.students.map((student, index) => {
+                        return (
+                          <tr key={student.id}>
+                            <td style={{ width: 60 }}>
+                              <img className="avatar" src={baseurl + (student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
+                            </td>
+                            <td>{student.id}</td>
+                            <td>{student.firstName} {student.lastName}</td>
+                            <td>{student.className}</td>
+                            <td>{new Date(student.dateOfBirth).toDateString()}</td>
+                            <td>{student.gender}</td>
+                            <td>{student.emergencyContact.firstName} {student.emergencyContact.lastName}</td>
+                            <td>{student.emergencyContact.mobileNo}</td>
+                            <td>
+                              <Link to={"view-student/" + student.id}><button type="button" className="btn btn-icon btn-sm" title="View"><i className="fa fa-eye"></i></button></Link>
+                              <Link to={"edit-student/" + student.id}><button type="button" className="btn btn-icon btn-sm" title="Edit"><i className="fa fa-edit"></i></button></Link>
+                              <button type="button" className="btn btn-icon btn-sm js-sweetalert"
+                                title="Delete" data-type="confirm"><i className="fa fa-trash-o text-danger"
+                                  onClick={() => this.deleteStudent(index)}></i></button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
+                  {!this.state.isStudentsLoading && !this.state.students.length ?
+                      <div class="noDataText">
+                        <img class="noData d-block" src="../assets/images/undraw_No_data_re_kwbl.svg" alt="No Data" />
+                        <strong>No Data Available :(</strong>
+                      </div>
+                    : null }
+
+                  {this.state.isStudentsLoading ?
+                        <div class="spinner-border text-info my-5 d-block" role="status">
+                          <span class="sr-only">Loading...</span>
+                        </div>
+                       : null}
                 </div>
               </div>
               <div className="tab-pane" id="generate-id-card">
@@ -773,7 +624,7 @@ class Students extends AbstractComponent {
                           return (
                             <tr key={student.id}>
                               <td className="w-60">
-                                  <img className="avatar" src={baseurl+(student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
+                                <img className="avatar" src={baseurl + (student.photo ? student.photo : 'uploads/default.jpg')} alt="" />
                               </td>
                               <td>{student.id}</td>
                               <td>{student.firstName} {student.lastName}</td>
@@ -804,7 +655,7 @@ class Students extends AbstractComponent {
                       <div className="row mt-4">
                         <div class="input-group col-6" title="Background Color 1">
                           <input type="text" class="form-control" value={this.state.idCardColor1}
-                            readOnly={true} autoComplete="off"/>
+                            readOnly={true} autoComplete="off" />
                           <div class="input-group-append">
                             <input type="color" value={this.state.idCardColor1}
                               onChange={event => this.handleInputChange(event, 'idCardColor1')} className="btn" />
@@ -812,7 +663,7 @@ class Students extends AbstractComponent {
                         </div>
                         <div class="input-group col-6" title="Background Color 2">
                           <input type="text" class="form-control" value={this.state.idCardColor2}
-                            readOnly={true} autoComplete="off"/>
+                            readOnly={true} autoComplete="off" />
                           <div class="input-group-append">
                             <input type="color" value={this.state.idCardColor2}
                               onChange={event => this.handleInputChange(event, 'idCardColor2')} className="btn" />
@@ -827,7 +678,7 @@ class Students extends AbstractComponent {
                         </div>
                       </div> :
                       <div className="wrapper" id="id-card-wrapper">
-                        <div className="identityCard" style={{background: 'linear-gradient(to bottom, '+this.state.idCardColor1+' 46%, '+this.state.idCardColor2+' 100%)'}}>
+                        <div className="identityCard" style={{ background: 'linear-gradient(to bottom, ' + this.state.idCardColor1 + ' 46%, ' + this.state.idCardColor2 + ' 100%)' }}>
                           <header className="identityCard__header d-flex flex-column text-center">
                             <div>Central Academy School</div>
                             <div>Identity Card</div>
@@ -837,7 +688,7 @@ class Students extends AbstractComponent {
                                                 <strong>Carte nationale d'identité n° :</strong> {id}
                                             </div> */}
                             <div className="identityCard__visual">
-                              <img src={baseurl+(this.state.selectedStudentForIdCard.photo ?this.state.selectedStudentForIdCard.photo:'uploads/default.jpg')}
+                              <img src={baseurl + (this.state.selectedStudentForIdCard.photo ? this.state.selectedStudentForIdCard.photo : 'uploads/default.jpg')}
                                 alt="" />
                             </div>
                             <ul className="identityCard__list list-unstyled">
@@ -1214,7 +1065,7 @@ class Students extends AbstractComponent {
                             <div className="form-group row">
                               <label className="col-md-3 col-form-label">Class Section</label>
                               <div className="col-md-9">
-                              <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
+                                <SelectClassSection classes={this.state.classes} selectedClass={this.state.studentForm.admissionForClass}
                                   onChange={(event) => this.handleInputChange(event, 'studentForm.classSection')}
                                   readOnly={this.props.readOnly} value={this.state.studentForm.classSection} />
                               </div>
@@ -1602,29 +1453,11 @@ class Students extends AbstractComponent {
                   </div>
                 </div>
               </div>
-                  <Discharge></Discharge>                           
+              <Discharge></Discharge>
             </div>
           </div>
         </div>
-        {/* Start main footer */}
-        <div className="section-body">
-          <footer className="footer">
-            <div className="container-fluid">
-              <div className="row">
-                <div className="col-md-6 col-sm-12">
-                  Copyright © 2019 <a href="https://themeforest.net/user/puffintheme/portfolio">PuffinTheme</a>.
-                    </div>
-                <div className="col-md-6 col-sm-12 text-md-right">
-                  <ul className="list-inline mb-0">
-                    <li className="list-inline-item"><a href="../doc/index.html">Documentation</a></li>
-                    <li className="list-inline-item"><a href="javascript:void(0)">FAQ</a></li>
-                    <li className="list-inline-item"><a href="javascript:void(0)" className="btn btn-outline-primary btn-sm">Buy Now</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </footer>
-        </div>
+        <Footer />
       </div>
     );
   }
