@@ -1,5 +1,6 @@
 import React from 'react';
 import { apiurl } from '../../shared/baseurl';
+import swal from'sweetalert';
 
 class AbstractComponent extends React.Component {
     constructor() {
@@ -78,6 +79,9 @@ class AbstractComponent extends React.Component {
           'Content-Type': 'application/json'
         }, JSON.stringify(this.state[listName+'SearchParam']))
         .then(students => {
+            if(this.isErrorPresent(students)) {
+                return;
+            }
           this.setState({
             isStudentsLoading: false,
             [listName]: students
@@ -146,6 +150,15 @@ class AbstractComponent extends React.Component {
             day = '0' + day;
     
         return [day, month, year].join('/');
+    }
+
+    isErrorPresent(payload) {
+        this.toggleLoading(false);
+        if(payload.Message) {
+            swal('Error!', payload.Message, 'error');
+            return true;
+        }
+        return false;
     }
 }
 

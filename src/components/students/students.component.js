@@ -3,6 +3,7 @@ import { baseurl } from '../../shared/baseurl';
 import Discharge from '../discharge/discharge.component';
 import SelectClass, {SelectClassSection} from '../selectclass/selectclass.component';
 import { Link } from 'react-router-dom';
+import swal from 'sweetalert';
 
 
 function StateDropdown(props) {
@@ -199,16 +200,23 @@ class Students extends AbstractComponent {
 
     this.setState({ isStudentsLoading: true });
     this.fetchClasses()
-      .then(classes => {
-        this.callServerMethod('student')
-          .then(students => {
-            this.setState({
-              isStudentsLoading: false,
-              students: students
-            });
-          });
-        this.setState({ classes: classes });
-      }).catch(err => console.log(err));
+    .then(classes => {
+      if(this.isErrorPresent(classes)){
+        return;
+      }
+      this.setState({ classes: classes });
+    }).catch(err => console.log(err));
+    
+    this.callServerMethod('student')
+    .then(students => {
+      if(this.isErrorPresent(students)){
+        return;
+      }
+      this.setState({
+        isStudentsLoading: false,
+        students: students
+      });
+    });
   }
 
   handleAdmissionFormSubmit(event) {
@@ -283,7 +291,7 @@ class Students extends AbstractComponent {
           }).then(res => {
             this.toggleLoading(false);
             if (res.success) {
-              alert('Form Submittes Form is successfully submitted success');
+              swal('Form Submitted', 'Form is successfully submitted' ,'success');
               this.showFeeForClass(admissionForm.admissionForClass, res.payload);
               const students = this.state.students;
               const admissionForClass = document.getElementById('admission-for-class');
@@ -427,7 +435,7 @@ class Students extends AbstractComponent {
       year: new Date().getFullYear().toString()
     })).then(res => {
       this.toggleLoading(false);
-      console.log('Pay Successful!', res.message, 'success');
+      swal('Pay Successful!', res.message, 'success');
       this.toggleFeeCard();
       this.setState({ feeToPay: 0 });
     }).catch(err => console.log(err));

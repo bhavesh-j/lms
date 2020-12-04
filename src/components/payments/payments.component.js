@@ -1,6 +1,7 @@
 import AbstractComponent from '../abstract/abstract.component';
 import SelectClass from '../selectclass/selectclass.component';
 import { baseurl } from '../../shared/baseurl';
+import swal from 'sweetalert';
 
 class Payments extends AbstractComponent {
   constructor() {
@@ -34,6 +35,9 @@ class Payments extends AbstractComponent {
   componentDidMount() {
     this.fetchClasses()
     .then(classes => {
+      if(this.isErrorPresent(classes)) {
+        return;
+      }
       this.setState({classes: classes});
       return this.handleStudentSearch(null, 'students', 'student/due-fees');
     }).catch(err => console.log(err));
@@ -55,6 +59,9 @@ class Payments extends AbstractComponent {
     });
     this.callServerMethod('student/'+studentId+'/'+classId+'/fee-info')
     .then(res => {
+      if(this.isErrorPresent(res)) {
+        return;
+      }
       const paidFees = res.paidFees;
       res.feeStructures.forEach((structure, index) => {
         const paid = (paidFees[structure.id] ? paidFees[structure.id].paidAmount : 0);
@@ -112,8 +119,11 @@ class Payments extends AbstractComponent {
       amount: this.state.feeToPay,
       year: new Date().getFullYear().toString()
     })).then(res => {
+      if(this.isErrorPresent(res)) {
+        return;
+      }
       this.toggleLoading(false);
-      console.log('Pay Successful!', res.message, 'success');
+      swal('Pay Successful!', res.message, 'success');
       this.setState({
         showReceipt: true,
         showFeeScreen: false,
@@ -134,6 +144,9 @@ class Payments extends AbstractComponent {
     const classId = event.target.value;
     this.callServerMethod('feestructure/'+classId)
     .then(feeData => {
+      if(this.isErrorPresent(feeData)) {
+        return;
+      }
       this.setState({feeMasterStructures: feeData});
     }).catch(err => console.log(err));
   }
@@ -150,9 +163,11 @@ class Payments extends AbstractComponent {
       'Content-Type': 'application/json'
     }, JSON.stringify(feeStructures))
     .then(feeData => {
-      console.log(feeData);
+      if(this.isErrorPresent(feeData)) {
+        return;
+      }
       this.toggleLoading(false);
-      console.log('Success', 'Fee information updated successfully!', 'success');
+      swal('Success', 'Fee information updated successfully!', 'success');
       this.setState({feeMasterStructures: feeData});
     }).catch(err => console.log(err));
   }
