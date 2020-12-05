@@ -769,7 +769,8 @@ class Payments extends AbstractComponent {
               <div className="tab-pane" id="Installment-penalty">
                 <div className="container card">
                   <div className="card-header row">
-                    <div className="col-12 row">
+                  <h3 className="card-title">INSTALLMENT MANAGEMENT</h3>
+                    <div className="col-12 row mt-4">
                       <label className="col-auto font-weight-bold mt-2 mr-4"> Class</label>
                       <div className="col-lg-4 col-md-5 col-sm-6">
                         <SelectClass classes={this.state.classes} disabledFirst={true}
