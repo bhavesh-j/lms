@@ -42,7 +42,7 @@ class AbstractComponent extends React.Component {
             originalValue = event;
         } else {
             originalValue = event.target.value;
-            if(type && isNaN(originalValue)) {
+            if(type === 'number' && (isNaN(Number(originalValue)) || Number(originalValue) < 0)) {
                 return;
             }
         }
@@ -163,6 +163,7 @@ class AbstractComponent extends React.Component {
     isErrorPresent(payload) {
         this.toggleLoading(false);
         if(payload.Message) {
+            console.log(payload);
             // swal('Error!', payload.Message, 'error');
             toast.show({title: payload.Message, position: 'bottomright', type: 'error'});
             return true;

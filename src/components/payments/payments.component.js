@@ -24,7 +24,8 @@ class Payments extends AbstractComponent {
       selectedFeeParams: null,
       showReceipt: false,
       invoice: null,
-      feeMasterStructures: []
+      feeMasterStructures: [],
+      feeAddons: null
     }
     this.openPayFeeScreen = this.openPayFeeScreen.bind(this);
     this.toggleAvailed = this.toggleAvailed.bind(this);
@@ -151,7 +152,10 @@ class Payments extends AbstractComponent {
       if(this.isErrorPresent(feeData)) {
         return;
       }
-      this.setState({feeMasterStructures: feeData});
+      this.setState({
+        feeMasterStructures: feeData.feeStructures,
+        feeAddons: feeData.feeAddons
+      });
     }).catch(err => console.log(err));
   }
 
@@ -165,14 +169,17 @@ class Payments extends AbstractComponent {
     this.toggleLoading(true);
     this.callServerMethod('feestructure/update-structures', 'POST', {
       'Content-Type': 'application/json'
-    }, JSON.stringify(feeStructures))
+    }, JSON.stringify({...feeStructures, classId: this.state.feeAddons.classId}))
     .then(feeData => {
       if(this.isErrorPresent(feeData)) {
         return;
       }
       this.toggleLoading(false);
       toast.show({title: 'Fee information updated successfully!', position: 'bottomright', type: 'success'});
-      this.setState({feeMasterStructures: feeData});
+      this.setState({
+        feeMasterStructures: feeData.feeStructures,
+        feeAddons: feeData.feeAddons
+      });
     }).catch(err => console.log(err));
   }
 
@@ -523,6 +530,36 @@ class Payments extends AbstractComponent {
                           </div>
                           );
                         })}
+                        {this.state.feeAddons ?
+                        <>
+                          <div class="form-group row">
+                            <label class="col-4 font-weight-bold">Panelty</label>
+                            <div className="d-flex col">
+                              <input type="text" name={'panelty-'+this.state.feeAddons.paneltyType}
+                                value={this.state.feeAddons.panelty} class="form-control" required min="0"
+                                onChange={event => this.handleInputChange(event, 'feeAddons.panelty', 'number')}/>
+                              <select value={this.state.feeAddons.paneltyType} required={true} className="form-control"
+                                onChange={event => this.handleInputChange(event, 'feeAddons.paneltyType')}>
+                                <option value="Percentage">Percentage</option>
+                                <option value="Flat Rate">Flat Rate</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label class="col-4 font-weight-bold">3rd Sibling Discount</label>
+                            <div className="d-flex col">
+                              <input type="text" name={'siblingDiscount-'+this.state.feeAddons.siblingDiscountType}
+                                value={this.state.feeAddons.siblingDiscount} class="form-control" required min="0"
+                                onChange={event => this.handleInputChange(event, 'feeAddons.siblingDiscount', 'number')}/>
+                              <select value={this.state.feeAddons.siblingDiscountType} required={true} className="form-control"
+                                onChange={event => this.handleInputChange(event, 'feeAddons.siblingDiscountType')}>
+                                <option value="Percentage">Percentage</option>
+                                <option value="Flat Rate">Flat Rate</option>
+                              </select>
+                            </div>
+                          </div>
+                        </>
+                        : null}
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                   </div>
