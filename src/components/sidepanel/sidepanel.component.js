@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function SidePanel() {
+    var [sidePanel, toggleSidePanel] = React.useState(false);
+    var [fee, togglefee] = React.useState(false);
     return (
         <div id="main_content">
             <div id="overlay" style={{zIndex: 100}}>
@@ -764,7 +766,40 @@ function SidePanel() {
                                 <li className="active"><Link to="/"><i className="fa fa-dashboard"></i><span>Dashboard</span></Link></li>
                                 <li><a href="professors.html"><i className="fa fa-black-tie"></i><span>Professors</span></a></li>
                                 <li><a href="staff.html"><i className="fa fa-user-circle-o"></i><span>Staff</span></a></li>
-                                <li><Link to="/students"><i className="fa fa-users"></i><span>Students</span></Link></li>
+                                <li>
+                                    <Link onClick={() => toggleSidePanel(!sidePanel)}>
+                                        <i className="fa fa-users"></i><span>Students</span>
+                                    </Link>
+                                </li>
+                                {sidePanel ?
+                                    <div>
+                                        <ul className="metismenu mr-2">
+                                            <li>
+                                                <Link to="students"><i className="fa fa-users"></i><span>List View</span></Link>
+                                                <Link to="students"><i className="fa fa-users"></i><span>Generate ID Card</span></Link>
+                                                <Link to="students"><i className="fa fa-users"></i><span>Admission Form</span></Link>
+                                                <Link to="students"><i className="fa fa-users"></i><span>Discharge</span></Link>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                : null }
+                                <li>
+                                    <Link onClick={() => togglefee(!fee)}>
+                                        <i className="fa fa-credit-card"></i><span>Fee Management</span>
+                                    </Link>
+                                </li>
+                                {fee ?
+                                    <div>
+                                        <ul className="metismenu mr-2">
+                                            <li>
+                                                <Link to="/payments"><i className="fa fa-credit-card"></i><span>List</span></Link>
+                                                <Link to="/payments"><i className="fa fa-credit-card"></i><span>Fee Master</span></Link>
+                                                <Link to="/payments"><i className="fa fa-credit-card"></i><span>Add Fees</span></Link>
+                                                <Link to="/payments"><i className="fa fa-credit-card"></i><span>Installments & Penaltieand</span></Link>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                : null }
                                 <li><a href="departments.html"><i className="fa fa-users"></i><span>Departments</span></a></li>
                                 <li><a href="courses.html"><i className="fa fa-graduation-cap"></i><span>Courses</span></a></li>                        
                                 <li><a href="library.html"><i className="fa fa-book"></i><span>Library</span></a></li>

@@ -87,6 +87,7 @@ class AbstractComponent extends React.Component {
           'Content-Type': 'application/json'
         }, JSON.stringify(this.state[listName+'SearchParam']))
         .then(students => {
+            console.log(students);
             if(this.isErrorPresent(students)) {
                 return;
             }

@@ -3,6 +3,8 @@ import SelectClass from '../selectclass/selectclass.component';
 import { baseurl } from '../../shared/baseurl';
 import Header from '../header/header.component';
 import Footer from '../footer/footer.component';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 // import swal from 'sweetalert';
 import { toast } from 'toast-notification-alert';
@@ -25,7 +27,13 @@ class Payments extends AbstractComponent {
       showReceipt: false,
       invoice: null,
       feeMasterStructures: [],
-      feeAddons: null
+      feeAddons: null,
+      installments: [],
+      totalFee: 0,
+      isInstallmentsLoading: false,
+      installmentsCount: 0,
+      inputInstallments: [],
+      dueList: []
     }
     this.openPayFeeScreen = this.openPayFeeScreen.bind(this);
     this.toggleAvailed = this.toggleAvailed.bind(this);
@@ -35,6 +43,10 @@ class Payments extends AbstractComponent {
     this.printReceipt = this.printReceipt.bind(this);
     this.handleFeeStructureRequest = this.handleFeeStructureRequest.bind(this);
     this.handleFeeStructureUpdate = this.handleFeeStructureUpdate.bind(this);
+    this.handleFeeInstallmentsRequest = this.handleFeeInstallmentsRequest.bind(this);
+    this.handleFeeInstallmentsUpdate = this.handleFeeInstallmentsUpdate.bind(this);
+    this.getInstallmentsList = this.getInstallmentsList.bind(this);
+    this.updateLastAmount = this.updateLastAmount.bind(this);
   }
 
   componentDidMount() {
@@ -46,6 +58,15 @@ class Payments extends AbstractComponent {
       this.setState({classes: classes});
       return this.handleStudentSearch(null, 'students', 'student/due-fees');
     }).catch(err => console.log(err));
+
+    this.callServerMethod('student/due-list')
+    .then(students => {
+      console.log(students);
+      if(this.isErrorPresent(students)) {
+        return;
+      }
+      this.setState({dueList: students});
+    })
   }
 
   toggleAvailed(index) {
@@ -183,6 +204,98 @@ class Payments extends AbstractComponent {
     }).catch(err => console.log(err));
   }
 
+  handleFeeInstallmentsRequest(event) {
+    const classId = event.target.value;
+    this.setState({
+      isInstallmentsLoading: true,
+      installments: [],
+      installmentsCount: 0,
+      inputInstallments: []
+    });
+    this.callServerMethod(`feestructure/${classId}/installments`)
+    .then(response => {
+      console.log(response);
+      if(this.isErrorPresent(response)) {
+        return;
+      }
+      this.setState({
+        isInstallmentsLoading: false,
+        installments: response.installments,
+        totalFee: response.totalFee,
+        installmentsCount: response.installments.length,
+        inputInstallments: response.installments
+      });
+    })
+  }
+
+  handleFeeInstallmentsUpdate(event) {
+    event.preventDefault();
+    this.setState({
+      isInstallmentsLoading: true
+    });
+    const installments = this.state.installments.map(item => {
+      return {
+        ...item,
+        installmentDate: this.setTimeZoneToUTC(new Date(item.installmentDate)),
+        extendDate: this.setTimeZoneToUTC(new Date(item.extendDate))
+      };
+    });
+    console.log(installments);
+    const classId = this.state.installments[0].classId;
+    this.callServerMethod(`feestructure/${classId}/installments`, 'POST',{
+      'Content-Type': 'application/json'
+    }, JSON.stringify(installments))
+    .then(response => {
+      if(this.isErrorPresent(response)) {
+        return;
+      }
+      toast.show({title: 'Installments updated!', 'position': 'bottomright', 'type': 'success'});
+      this.setState({
+        isInstallmentsLoading: false,
+        installments: response.installments,
+        totalFee: response.totalFee,
+        installmentsCount: response.installments.length,
+        inputInstallments: response.installments
+      });
+    })
+  }
+
+  getInstallmentsList() {
+    let list = this.copyObject(this.state.installments);
+    const totalFee = this.state.totalFee;
+    const parts = Math.round(totalFee / this.state.installmentsCount);
+    list = list.map(el => {
+      return {...el, amount: parts};
+    });
+    if(this.state.installmentsCount < this.state.installments.length) {
+      list = list.slice(0, this.state.installmentsCount);
+    } else {
+      for(let i=this.state.installments.length;i<this.state.installmentsCount;i++) {
+        list.push({
+          "classId": this.state.feeMasterClass,
+          "installmentDate": new Date(),
+          "extendDate": new Date(),
+          "amount": parts
+        });
+      }
+    }
+    list[list.length-1].amount += totalFee - list.reduce((total, el) => {
+      total += Number(el.amount);
+      return total;
+    }, 0);
+    this.setState({inputInstallments: list});
+    return list;
+  }
+
+  updateLastAmount() {
+    const list = this.state.inputInstallments;
+    list[list.length-1].amount += this.state.totalFee - list.reduce((total, el) => {
+      total += Number(el.amount);
+      return total;
+    }, 0);
+    this.setState({inputInstallments: list});
+  }
+
   render() {
     return (
       <div className="page">
@@ -202,9 +315,9 @@ class Payments extends AbstractComponent {
               <ul className="nav nav-tabs page-header-tab">
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Fees-all">List</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-Receipt">Fees Receipt</a></li>
-                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#fee-master">Fee Master</a></li>
-                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-add">Add Fees</a></li>
-                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Installment-penalty">Installment & Penalties</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#fee-master" onClick={() => this.setState({feeMasterClass: ''})}>Fee Master</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-add" id="fees-add-btn">Add Fees</a></li>
+                <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Installment-penalty" onClick={() => this.setState({feeMasterClass: ''})}>Installment & Penalties</a></li>
               </ul>
             </div>
           </div>
@@ -219,189 +332,36 @@ class Payments extends AbstractComponent {
                       <table className="table table-hover text-nowrap js-basic-example dataTable table-striped table_custom border-style spacing5">
                         <thead>
                           <tr>
-                            <th>Roll No.</th>
+                            <th>ID</th>
                             <th>Student Name</th>
-                            <th>Fees Type</th>
-                            <th>Date</th>
-                            <th>Invoice No.</th>
-                            <th>Payment Type</th>
-                            <th>Status</th>
-                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Due Amount</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>111</td>
-                            <td>Corrine Johnson</td>
-                            <td>Annual</td>
-                            <td>12 Jan 2018</td>
-                            <td>IN-4578</td>
-                            <td>cash</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>248$</td>
-                          </tr>
-                          <tr>
-                            <td>112</td>
-                            <td>Gladys Smith</td>
-                            <td>Tuition</td>
-                            <td>12 Feb 2018</td>
-                            <td>IN-3695</td>
-                            <td>cheque</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>124$</td>
-                          </tr>
-                          <tr>
-                            <td>113</td>
-                            <td>Alice Smith</td>
-                            <td>Annual</td>
-                            <td>24 Feb 2018</td>
-                            <td>IN-4679</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-red">unpaid</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>114</td>
-                            <td>Gladys Smith</td>
-                            <td>Tuition</td>
-                            <td>25 Feb 2018</td>
-                            <td>IN-2839</td>
-                            <td>cashn</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>112$</td>
-                          </tr>
-                          <tr>
-                            <td>115</td>
-                            <td>Corrine Johnson</td>
-                            <td>Transport</td>
-                            <td>12 March 2018</td>
-                            <td>IN-4916</td>
-                            <td>cheque</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>116</td>
-                            <td>Gladys Smith</td>
-                            <td>Tuition</td>
-                            <td>12 May 2018</td>
-                            <td>IN-7542</td>
-                            <td>cashn</td>
-                            <td><span className="tag tag-red">unpaid</span></td>
-                            <td>421$</td>
-                          </tr>
-                          <tr>
-                            <td>117</td>
-                            <td>Alice Smith</td>
-                            <td>Transport</td>
-                            <td>12 May 2018</td>
-                            <td>IN-8653</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>124$</td>
-                          </tr>
-                          <tr>
-                            <td>118</td>
-                            <td>Gladys Smith</td>
-                            <td>Library</td>
-                            <td>12 May 2018</td>
-                            <td>IN-4859</td>
-                            <td>cheque</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>485$</td>
-                          </tr>
-                          <tr>
-                            <td>119</td>
-                            <td>Alice Smith</td>
-                            <td>Annual</td>
-                            <td>12 Jun 2018</td>
-                            <td>IN-2648</td>
-                            <td>cheque</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>231$</td>
-                          </tr>
-                          <tr>
-                            <td>120</td>
-                            <td>Corrine Johnson</td>
-                            <td>Tuition</td>
-                            <td>21 Jun 2018</td>
-                            <td>IN-4875</td>
-                            <td>cashn</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>4856$</td>
-                          </tr>
-                          <tr>
-                            <td>121</td>
-                            <td>Gladys Smith</td>
-                            <td>Transport</td>
-                            <td>28 Jun 2018</td>
-                            <td>IN-7946</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-red">unpaid</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>122</td>
-                            <td>Ken Smith</td>
-                            <td>Annual</td>
-                            <td>12 Jun 2018</td>
-                            <td>IN-9135</td>
-                            <td>cheque</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>123</td>
-                            <td>Corrine Johnson</td>
-                            <td>Annual</td>
-                            <td>22 Jun 2018</td>
-                            <td>IN-5284</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>124</td>
-                            <td>Ken Smith</td>
-                            <td>Transport</td>
-                            <td>18 Aug 2018</td>
-                            <td>IN-4613</td>
-                            <td>cashn</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>254$</td>
-                          </tr>
-                          <tr>
-                            <td>125</td>
-                            <td>Emmett Johnson</td>
-                            <td>Annual</td>
-                            <td>13 Aug 2018</td>
-                            <td>IN-1826</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-red">unpaid</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>126</td>
-                            <td>Ken Smith</td>
-                            <td>Library</td>
-                            <td>17 Aug 2018</td>
-                            <td>IN-76149</td>
-                            <td>cashn</td>
-                            <td><span className="tag tag-green">paid</span></td>
-                            <td>340$</td>
-                          </tr>
-                          <tr>
-                            <td>127</td>
-                            <td>Emmett Johnson</td>
-                            <td>Annual</td>
-                            <td>4 Sept 2018</td>
-                            <td>IN-3794</td>
-                            <td>credit card</td>
-                            <td><span className="tag tag-orange">pending</span></td>
-                            <td>548$</td>
-                          </tr>
+                          {this.state.dueList.map((dueFee, index) => {
+                            return(
+                              <tr key={index}>
+                                <td>{dueFee.id}</td>
+                                <td>{dueFee.firstName} {dueFee.lastName}</td>
+                                <td>{new Date(dueFee.dueDate).toDateString()}</td>
+                                <td>{dueFee.dueFee}</td>
+                                <td><button className="btn btn-primary"
+                                  onClick={() => {
+                                    document.getElementById('fees-add-btn').click();
+                                    this.openPayFeeScreen(dueFee.id, dueFee.classId);
+                                  }}>Collect</button></td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
+                      {!this.state.dueList.length ?
+                      <div class="noDataText">
+                        <img class="noData d-block" src="../assets/images/undraw_No_data_re_kwbl.svg" alt="No Data" />
+                        <strong>No Data Available :(</strong>
+                      </div>
+                    : null }
                     </div>
                   </div>
                 </div>
@@ -730,6 +690,20 @@ class Payments extends AbstractComponent {
                                 </tr>
                               );
                           })}
+                            {this.state.feeResources.panelty ? 
+                              <tr>
+                                <td class="font-weight-bold">Panelty</td>
+                                <td>{this.state.feeResources.panelty}</td>
+                                <td></td>
+                                <td></td>
+                              </tr> : null}
+                              {this.state.feeResources.siblintDiscount ? 
+                              <tr>
+                                <td class="font-weight-bold">3rd Sibling Discount</td>
+                                <td>{this.state.feeResources.siblintDiscount}</td>
+                                <td></td>
+                                <td></td>
+                              </tr> : null}
                               <tr>
                                   <td class="font-weight-bold">Total</td>
                                   <td>{this.getTotalFee()}</td>
@@ -738,7 +712,7 @@ class Payments extends AbstractComponent {
                                   }, 0)}</td>
                                   <td id="total-fee">{this.getTotalFee() - Object.values(this.state.feeResources.paidFees).reduce((total, fee) => {
                                     return total + fee.paidAmount;
-                                  }, 0)}</td>
+                                  }, 0) - this.state.feeResources.siblintDiscount + this.state.feeResources.panelty}</td>
                                   <td></td>
                               </tr>
                           </tbody>
@@ -747,6 +721,7 @@ class Payments extends AbstractComponent {
                           <label for="fee-to-pay" class="pl-2">Capture fee:</label>
                           <div class="d-flex">
                               <input type="text" class="form-control" onChange={event => this.checkFeeValidity(event)} min="1" required id="fee-to-pay" placeholder="Enter amount to pay" />
+                              <input type="text" class="form-control" placeholder="Enter method of payment" />
                               <button type="submit" class="btn btn-primary">Submit</button>
                           </div>
                       </form>
@@ -813,28 +788,32 @@ class Payments extends AbstractComponent {
                         <SelectClass classes={this.state.classes} disabledFirst={true}
                           value={this.state.feeMasterClass}
                           onChange={event => {
-                            this.setState({feeMasterClass: event.target.value, feeMasterStructures: []});
-                            this.handleFeeStructureRequest(event); 
+                            this.setState({feeMasterClass: event.target.value, installments: []});
+                            this.handleFeeInstallmentsRequest(event); 
                           }} />
                       </div>
                     </div>
                   </div>
                   <div className="row card-body" style={{minHeight: '30em'}}>
-                    {this.state.feeMasterClass && !this.state.feeMasterStructures.length ?
+                    {this.state.isInstallmentsLoading ?
                     <div className="col-12" id="fee-structure-loading">
                       <div className="spinner-border m-4" role="status">
                         <span className="sr-only">Loading...</span>
                       </div>
                     </div> : null }
-                    <form onSubmit={event => this.handleFeeStructureUpdate(event)}
+                    {!this.state.isInstallmentsLoading && this.state.feeMasterClass ?
+                    <form onSubmit={event => this.handleFeeInstallmentsUpdate(event)}
                       className="col-12 col-sm-10 col-md-8" id="structure-form">                 
                             <div class="form-group row">
                               <label class="col-4 font-weight-bold">Total Fees Amount</label>
-                              <input disabled placeholder="12000$" type="text" class="col form-control" required min="0"/>                              
+                              <input disabled value={this.state.totalFee} type="text" class="col form-control" required min="0"/>                              
                             </div>
                             <div class="form-group row mt-2">
                               <label class="col-4 font-weight-bold">Installment Duration</label>
-                              <input type="number" class="col form-control" required min="0"/>                              
+                              <input type="number" value={this.state.installmentsCount} onChange={(event) => {
+                                this.handleInputChange(event, 'installmentsCount', 'number');
+                                setTimeout(() => this.getInstallmentsList(event.target), 10);
+                              }} class="col form-control" required min="1"/>                              
                             </div>
                             <div class="row m-3">
                             <table class="table table-hover mt-4">
@@ -843,50 +822,43 @@ class Payments extends AbstractComponent {
                                     <th scope="col">S.No</th>
                                     <th scope="col">Amount</th>
                                     <th scope="col">Installment Date</th>
-                                    <th scope="col">Extension</th>
+                                    {/* <th scope="col">Extension</th> */}
                                     <th scope="col">Extended Date</th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
-                                    <th scope="row">1</th>
-                                    <td>1000</td>
-                                    <td><input type="date"/></td>
-                                    <td><input type="checkbox"/></td>
-                                    <td><input disabled type="date"/></td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">2</th>
-                                    <td>1000</td>
-                                    <td><input type="date"/></td>
-                                    <td><input type="checkbox"/></td>
-                                    <td><input disabled type="date"/></td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">3</th>
-                                    <td>1000</td>
-                                    <td><input type="date"/></td>
-                                    <td><input type="checkbox"/></td>
-                                    <td><input disabled type="date"/></td>
-                                  </tr>
+                                  {this.state.inputInstallments.map((installment,index, arr) => {
+                                    return (
+                                      <tr>
+                                        <th scope="row">{index+1}</th>
+                                        <td>
+                                            <input type="text" value={installment.amount} className="form-cotrol" onChange={(event) => {
+                                              this.handleInputChange(event, 'inputInstallments.'+index+'.amount');
+                                              setTimeout(() => this.updateLastAmount(), 10);
+                                            }} disabled={Number(index+1)===Number(arr.length)} required />
+                                        </td>
+                                        <td>
+                                        <DatePicker selected={new Date(installment.installmentDate)}
+                                          onChange={(event) => {
+                                            this.handleInputChange(event, 'inputInstallments.'+index+'.installmentDate', 'date');
+                                            this.handleInputChange(event, 'inputInstallments.'+index+'.extendDate', 'date');
+                                          }} className="form-control" placeholderText="MM/DD/YYYY" required={true} /></td>
+                                        {/* <td><input type="checkbox"/></td> */}
+                                        <td>
+                                        <DatePicker selected={new Date(installment.extendDate)}
+                                          onChange={(event) => {
+                                            this.handleInputChange(event, 'inputInstallments.'+index+'.extendDate', 'date');
+                                          }} className="form-control" placeholderText="MM/DD/YYYY" required={true} />
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
                                 </tbody>
                               </table>
-                              <div class="form-group row mt-4">
-                              <label class="col font-weight-bold">Penalty</label>
-                              <div class="col dropdown"> 
-                              <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Select Type
-                              </button>
-                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#">Flat Based</a>
-                                <a class="dropdown-item" href="#">Percentage Based</a>
-                              </div>
-                            </div>
-                            <input type="text"/>
-                            </div>
                             </div>
                           <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
                       </form>
+                    : null}
                     </div>
                 </div>
               </div>

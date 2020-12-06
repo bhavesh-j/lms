@@ -99,3 +99,6 @@ html, body {
     height: 100%;
   } */
   
+  .form-control, [generated="true"] {
+    background-color: #fff !important;
+  }
