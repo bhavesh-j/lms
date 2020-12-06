@@ -123,13 +123,18 @@ class Payments extends AbstractComponent {
       return;
     }
     this.setState({feeToPay: value});
-    const totalFee = this.getTotalFee();
+    const totalFee = this.getTotalFee() - Object.values(this.state.feeResources.paidFees).reduce((total, fee) => {
+      return total + fee.paidAmount;
+    }, 0) - this.state.feeResources.siblingDiscount + this.state.feeResources.panelty;
     const feeToPay = Number(value);
     event.target.setCustomValidity((feeToPay > totalFee) ? "Fee amount is greate than "+totalFee+"!": "");
   }
 
   handleSubmitFee(event) {
     event.preventDefault();
+    if(!event.target.checkValidity) {
+      return;
+    }
     this.toggleLoading(true);
     const hostel = document.getElementById('avail-hostel-fee')
       ? document.getElementById('avail-hostel-fee').checked : false;
@@ -233,7 +238,7 @@ class Payments extends AbstractComponent {
     this.setState({
       isInstallmentsLoading: true
     });
-    const installments = this.state.installments.map(item => {
+    const installments = this.state.inputInstallments.map(item => {
       return {
         ...item,
         installmentDate: this.setTimeZoneToUTC(new Date(item.installmentDate)),
@@ -249,6 +254,7 @@ class Payments extends AbstractComponent {
       if(this.isErrorPresent(response)) {
         return;
       }
+      console.log(response);
       toast.show({title: 'Installments updated!', 'position': 'bottomright', 'type': 'success'});
       this.setState({
         isInstallmentsLoading: false,
@@ -279,10 +285,12 @@ class Payments extends AbstractComponent {
         });
       }
     }
-    list[list.length-1].amount += totalFee - list.reduce((total, el) => {
-      total += Number(el.amount);
-      return total;
-    }, 0);
+    if(list.length) {
+      list[list.length-1].amount += totalFee - list.reduce((total, el) => {
+        total += Number(el.amount);
+        return total;
+      }, 0);
+    }
     this.setState({inputInstallments: list});
     return list;
   }
@@ -706,7 +714,11 @@ class Payments extends AbstractComponent {
                               </tr> : null}
                               <tr>
                                   <td class="font-weight-bold">Total</td>
-                                  <td>{this.getTotalFee()}</td>
+                                  <td>{this.getTotalFee()}{this.state.feeResources.panelty ? ' + '+this.state.feeResources.panelty : null}
+                                  {this.state.feeResources.siblintDiscount ? ' - '+this.state.feeResources.siblintDiscount : null}
+                                  {this.state.feeResources.siblintDiscount || this.state.feeResources.panelty ? ' = '
+                                    +(this.getTotalFee()+this.state.feeResources.panelty-this.state.feeResources.siblintDiscount)
+                                      : null}</td>
                                   <td>{Object.values(this.state.feeResources.paidFees).reduce((total, fee) => {
                                     return total + fee.paidAmount;
                                   }, 0)}</td>
