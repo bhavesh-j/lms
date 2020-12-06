@@ -6,7 +6,7 @@
 .pnp.js
 /_cacache
 /_locks
-
+/src/components/shared
 # testing
 /coverage
 
@@ -23,3 +23,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/src/shared/baseurl.js

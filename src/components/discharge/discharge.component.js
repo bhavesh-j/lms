@@ -14,7 +14,7 @@ class Discharge extends AbstractComponent {
                 name: '',
                 classId: ''
             },
-            showLeavingCertificate: true,
+            showLeavingCertificate: false,
             selectedStudentForLeaveCerti: null
         };
         this.printLeaveCerti = this.printLeaveCerti.bind(this); 
@@ -30,7 +30,8 @@ class Discharge extends AbstractComponent {
           return;
         }
         this.setState({
-          selectedStudentForLeaveCerti: student
+          selectedStudentForLeaveCerti: student,
+          showLeavingCertificate: true
         });
       }).catch(err => console.log(err));
     }
@@ -93,7 +94,7 @@ class Discharge extends AbstractComponent {
                   </div>
                 </form>
                 <div className="table-responsive card">
-                  {this.state.showLeavingCertificate ?
+                  {!this.state.showLeavingCertificate ?
                   <table id="student-table" className="table table-hover table-vcenter table-striped mb-0 text-nowrap">
                     <thead>
                       <tr>
@@ -133,10 +134,10 @@ class Discharge extends AbstractComponent {
                   </table> : null}              
                 </div>
               
-              {!this.state.showLeavingCertificate ? 
+              {this.state.showLeavingCertificate ? 
                 this.state.selectedStudentForLeaveCerti ?
                   <LeaveCerti student={this.state.selectedStudentForLeaveCerti}></LeaveCerti>
-                  : <div class="h3">Loading ...</div> : null}
+                  : this.state.students.length ? null : <div class="h3">Loading ...</div> : null}
               </div>
         )};
 }

@@ -8,7 +8,9 @@ import Header from '../header/header.component';
 import Footer from '../footer/footer.component';
 // import swal from 'sweetalert';
 import { toast } from 'toast-notification-alert';
-import DatePicker from "react-datepicker";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import AddClass from './addclass.component';
 
 
 function StateDropdown(props) {
@@ -177,7 +179,8 @@ class Students extends AbstractComponent {
       showIdCard: false,
       selectedStudentForIdCard: null,
       idCardColor1: '#a0d9d2',
-      idCardColor2: '#7e9fc2'
+      idCardColor2: '#7e9fc2',
+      discount: 0
     };
     this.defaultFormValues = {
       studentForm: this.copyObject(this.state.studentForm),
@@ -303,7 +306,7 @@ class Students extends AbstractComponent {
               const students = this.state.students;
               const admissionForClass = document.getElementById('admission-for-class');
               students.push({
-                id: res.payload,
+                id: res.payload.studentId,
                 firstName: admissionForm.firstName,
                 lastName: admissionForm.lastName,
                 className: admissionForClass.options[admissionForClass.selectedIndex].text,
@@ -315,7 +318,8 @@ class Students extends AbstractComponent {
               });
               this.setState({
                 students: students,
-                studentFormResources: { ...this.state.studentFormResources, studentId: res.payload }
+                studentFormResources: { ...this.state.studentFormResources, studentId: res.payload },
+                discount: res.payload.discount
               });
               this.scrollTop();
             } else {
@@ -359,7 +363,8 @@ class Students extends AbstractComponent {
   showFeeForClass(classId, studentId) {
     this.toggleLoading(true);
     this.callServerMethod('feestructure/' + classId)
-      .then(feeList => {
+      .then(feeData => {
+        const feeList = feeData.feeStructures;
         feeList.forEach((feeItem, index) => {
           const particular = feeItem.particular.toLowerCase();
           let toInclude = true;
@@ -391,7 +396,7 @@ class Students extends AbstractComponent {
     return this.state.feeList.reduce((totalFee, feeItem) => {
       if (feeItem.include) totalFee += feeItem.amount;
       return totalFee;
-    }, 0);
+    }, 0)-this.state.discount;
   }
 
   checkFeeValidity(event) {
@@ -441,6 +446,7 @@ class Students extends AbstractComponent {
       amount: feeToPay,
       year: new Date().getFullYear().toString()
     })).then(res => {
+      console.log(res);
       this.toggleLoading(false);
       toast.show({title: res.message, position: 'bottomright', type: 'success'});
       this.toggleFeeCard();
@@ -494,6 +500,7 @@ class Students extends AbstractComponent {
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-profile">Profile</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Admission Form</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-discharge">Discharge</a></li>
+                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#Courses-add">Add Class</a></li>
               </ul>
             </div>
           </div>
@@ -1015,10 +1022,24 @@ class Students extends AbstractComponent {
                               })}
                               <tr>
                                 <td class="font-weight-bold">Total:</td>
+                                <td class="font-weight-bold total-fee">{this.getTotalFee()+this.state.discount}</td>
+                                <td class="font-weight-bold">0</td>
+                                <td class="font-weight-bold total-fee">{this.getTotalFee()+this.state.discount}</td>
+                              </tr>
+                              {this.state.discount ? 
+                              <tr>
+                                <td class="font-weight-bold">3rd Sibling Discount:</td>
+                                <td class="font-weight-bold total-fee">{this.state.discount}</td>
+                                <td class="font-weight-bold"></td>
+                                <td class="font-weight-bold total-fee"></td>
+                              </tr> : null}
+                              {this.state.discount ? 
+                              <tr>
+                                <td class="font-weight-bold">Total After Discount:</td>
                                 <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
                                 <td class="font-weight-bold">0</td>
                                 <td class="font-weight-bold total-fee">{this.getTotalFee()}</td>
-                              </tr>
+                              </tr> : null}
                             </tbody>
                           </table>
                         </div>
@@ -1464,6 +1485,7 @@ class Students extends AbstractComponent {
                 </div>
               </div>
               <Discharge></Discharge>
+              <AddClass/>
             </div>
           </div>
         </div>

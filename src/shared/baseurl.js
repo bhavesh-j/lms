@@ -4,6 +4,6 @@ const baseurl = 'https://bsms.dabinventive.com/';
 
 // const baseurl = 'https://bsms.dabinventive.com/';
 // local url
-// const baseurl = 'https://localhost:3000/';
+// const baseurl = 'https://localhost:44311/';
 const apiurl = baseurl+'api/';
 export {baseurl, apiurl};
