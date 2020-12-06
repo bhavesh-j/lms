@@ -318,7 +318,7 @@ class Students extends AbstractComponent {
               });
               this.setState({
                 students: students,
-                studentFormResources: { ...this.state.studentFormResources, studentId: res.payload },
+                studentFormResources: { ...this.state.studentFormResources, studentId: res.payload.studentId },
                 discount: res.payload.discount
               });
               this.scrollTop();
@@ -429,13 +429,16 @@ class Students extends AbstractComponent {
 
   handleSubmitFee(event) {
     event.preventDefault();
+    if(!event.target.checkValidity()) {
+      return;
+    }
     this.toggleLoading(true);
     const hostel = document.getElementById('avail-hostel-fee').checked;
     const transport = document.getElementById('avail-transport-fee').checked;
     const classId = this.state.studentForm.admissionForClass;
     const studentId = this.state.studentFormResources.studentId;
     const feeToPay = this.state.feeToPay;
-    console.log(feeToPay);
+    // console.log(feeToPay);
     this.callServerMethod('payfee', 'POST', {
       'Content-Type': 'application/json'
     }, JSON.stringify({
