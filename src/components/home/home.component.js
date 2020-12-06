@@ -16,10 +16,10 @@ function Home() {
                                 <li className="breadcrumb-item active" aria-current="page">Dashboard</li>
                             </ol>
                         </div>
-                        <ul className="nav nav-tabs page-header-tab">
+                        {/* <ul className="nav nav-tabs page-header-tab">
                             <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#admin-Dashboard">Dashboard</a></li>
                             <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#admin-Activity">Activity</a></li>
-                        </ul>
+                        </ul> */}
                     </div>
                 </div>
             </div>

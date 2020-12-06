@@ -312,13 +312,13 @@ class Payments extends AbstractComponent {
                   <li className="breadcrumb-item active" aria-current="page">Fees</li>
                 </ol>
               </div>
-              <ul className="nav nav-tabs page-header-tab">
+              {/* <ul className="nav nav-tabs page-header-tab">
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Fees-all">List</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-Receipt">Fees Receipt</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#fee-master" onClick={() => this.setState({feeMasterClass: ''})}>Fee Master</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Fees-add" id="fees-add-btn">Add Fees</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Installment-penalty" onClick={() => this.setState({feeMasterClass: ''})}>Installment & Penalties</a></li>
-              </ul>
+              </ul> */}
             </div>
           </div>
         </div>

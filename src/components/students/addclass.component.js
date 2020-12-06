@@ -81,7 +81,7 @@ class AddClass extends AbstractComponent {
                     </div>
                     </div>
                     <div className="card-body">
-                    <form className="row clearfix" id="addClassForm" onSubmit={this.handleAddClass} noValidate>
+                    <form className="row clearfix" id="addClassForm" onSubmit={this.handleAddClass}>
                         <div className="col-sm-12">
                         <div className="form-group">
                             <input type="text" className="form-control" name="class-name" placeholder="Class Name" required
@@ -110,7 +110,7 @@ class AddClass extends AbstractComponent {
                     </div>
                     </div>
                     <div className="card-body">
-                    <form className="row clearfix" id="addSectionForm" onSubmit={this.handleAddSection} noValidate>
+                    <form className="row clearfix" id="addSectionForm" onSubmit={this.handleAddSection}>
                         <div className="col-sm-12">
                         <div className="form-group">
                             <SelectClass classes={this.state.classes} disabledFirst={false}

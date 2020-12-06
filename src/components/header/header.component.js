@@ -11,7 +11,7 @@ function Header(props) {
                   </div>
                 </div>
               </div>
-              <div className="right">
+              {/* <div className="right">
                 <ul className="nav nav-pills">
                   <li className="nav-item dropdown">
                     <a className="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)" role="button" aria-haspopup="true" aria-expanded="false">Pages</a>
@@ -155,7 +155,7 @@ function Header(props) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

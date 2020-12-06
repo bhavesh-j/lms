@@ -494,14 +494,14 @@ class Students extends AbstractComponent {
                   <li className="breadcrumb-item active" aria-current="page">Students</li>
                 </ol>
               </div>
-              <ul className="nav nav-tabs page-header-tab">
+              {/* <ul className="nav nav-tabs page-header-tab">
                 <li className="nav-item"><a className="nav-link active" data-toggle="tab" href="#Student-all">List View</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#generate-id-card">Generate Id Card</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-profile">Profile</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-add">Admission Form</a></li>
                 <li className="nav-item"><a className="nav-link" data-toggle="tab" href="#Student-discharge">Discharge</a></li>
                 <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#Courses-add">Add Class</a></li>
-              </ul>
+              </ul> */}
             </div>
           </div>
         </div>
